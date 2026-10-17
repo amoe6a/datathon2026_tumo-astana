@@ -21,6 +21,12 @@ Additional checks: JavaScript syntax; Python compilation; live HTTP smoke test o
 
 The local interface was opened and its actual synthetic upload, progress and multiple-event results were checked. It displayed two events, source timestamps, three source frames for each event, rule/test-condition text and the synthetic disclaimer. Browser playback of the generated MPEG-4 MOV was unsupported; the application hides the failed player and retains usable evidence frames. The normal result was also checked. Screenshots in the delivery show synthetic scenes only.
 
+## Frontend integration review — 17 October 2026
+
+PR #1, frontend revision `73adee8`, was reviewed and merged with the existing backend and ML implementation. The reviewed code passed all 11 frontend behavior tests and all 18 Python/API tests (61.34 seconds for the Python run), plus the JavaScript syntax check. The Python run reported one existing Starlette/HTTPX deprecation warning. The merged `app/`, `ml/`, `web/`, `tests/` and `rules/` trees match that tested revision; integration only updates documentation and the team-kit archive in addition to the merge.
+
+The frontend covers upload validation, API errors, Retry-After, bounded polling, recovery without duplicate upload, verdict validation and evidence dialogs. See `docs/frontend-handoff.md` for Amir's separate live-browser checks and remaining browser limitations. These checks use synthetic or controlled responses; real video detection quality and GPU performance remain unverified.
+
 ## Not verified
 
 - Detection quality, label coverage or confusion counts on ForteBank event videos.

@@ -12,10 +12,11 @@ A local video-review application for the ForteBank Datathon case. Upload a MOV f
 - [Amir: frontend and presentation instructions](team/AMIR_FRONTEND.md)
 - [Download the complete team kit ZIP](https://github.com/amoe6a/datathon2026_tumo-astana/raw/refs/heads/main/team-kit/forte-review-team-kit.zip)
 - [Verification report and remaining checks](TEST_REPORT.md)
+- [Frontend handoff and browser checks](docs/frontend-handoff.md)
 
-Clone this repository to work together, or download the ZIP for a standalone copy. The ZIP is the initial handoff snapshot and includes generated synthetic test clips; the repository contains their generator. Real event videos, runtime evidence and credentials are not included.
+Clone this repository to work together, or download the ZIP for a standalone copy. The ZIP was refreshed on 17 October 2026 after integrating Amir's frontend (PR #1), and includes generated synthetic test clips; the repository contains their generator. Real event videos, runtime evidence and credentials are not included. Use Git to receive later team changes.
 
-![Synthetic MVP preview](docs/images/mvp-preview.png)
+![Forte Review interface](docs/frontend-preview/desktop.jpg)
 
 ## Start here
 
@@ -107,6 +108,8 @@ For the offline test, download dependencies and weights first, disconnect intern
 .venv\Scripts\python.exe -m pytest tests -q
 .venv\Scripts\python.exe -m scripts.doctor
 ```
+
+With Node.js installed, run `node --check web/app.js` and `node --test tests/frontend.test.cjs` for the frontend checks. Node.js is only needed for these checks, not to run the application.
 
 Raw uploads are deleted after each job. Evidence and metadata stay in `runtime/jobs.sqlite3` for review and are protected by the API key. Stop the server and delete your task's runtime/data directories after the event according to its retention rules. They are ignored by Git; do not commit them. There is no automatic retention timer yet. API access control uses a single shared jury key, not per-user authorization. There is no face identification, audio analysis, external font/CDN request or model telemetry in the application code.
 
