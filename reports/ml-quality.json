@@ -1,0 +1,264 @@
+{
+  "status": "not_competition_ready",
+  "recorded_at_utc": "2026-10-17T12:44:13.000364+00:00",
+  "dataset": {
+    "files": 42,
+    "unique_videos": 40,
+    "source_positive_files": 22,
+    "source_negative_files": 20,
+    "split_files": {
+      "train": 26,
+      "val": 8,
+      "test": 8
+    },
+    "split_unique_videos": {
+      "train": 26,
+      "val": 7,
+      "test": 7
+    },
+    "grouping": "exact_SHA256_and_encoded_stream_duplicates_checked; recording_sessions_not_independently_reviewed"
+  },
+  "candidates": {
+    "weak_temporal_delta": {
+      "validation": {
+        "unique_videos": 7,
+        "files": 8,
+        "video_counts": {
+          "tp": 3,
+          "tn": 1,
+          "fp": 3,
+          "fn": 0
+        },
+        "video_metrics": {
+          "precision": 0.5,
+          "recall": 1.0,
+          "f1": 0.6666666666666666
+        }
+      },
+      "test_once_after_freeze": {
+        "unique_videos": 7,
+        "files": 8,
+        "video_counts": {
+          "tp": 3,
+          "tn": 0,
+          "fp": 3,
+          "fn": 1
+        },
+        "video_metrics": {
+          "precision": 0.5,
+          "recall": 0.75,
+          "f1": 0.6
+        }
+      },
+      "selected": {
+        "feature_variant": "temporal_delta",
+        "radius_sec": 2.0,
+        "C": 0.03,
+        "threshold": 0.6,
+        "training_frames": 1143
+      },
+      "weights_sha256": "3343a6abcfcac060fc30160cec1e23b99bf7b9242221aaf68992350d0bb3466b",
+      "selection_freeze_sha256": "48adbe9d84dd27907f372d3739ceb18b6636e09591b5f3ac957d96c84de39edc",
+      "test_organizer_anchor_recall_at_internal_3s": 0.5,
+      "test_median_matched_time_error_sec": 1.0
+    },
+    "video_temporal_pool": {
+      "selection": "4-fold train-only OOF",
+      "train_oof": {
+        "videos": 26,
+        "video_counts": {
+          "tp": 12,
+          "tn": 2,
+          "fp": 10,
+          "fn": 2
+        },
+        "video_metrics": {
+          "precision": 0.5454545454545454,
+          "recall": 0.8571428571428571,
+          "f1": 0.6666666666666666
+        }
+      },
+      "validation": {
+        "videos": 7,
+        "video_counts": {
+          "tp": 3,
+          "tn": 1,
+          "fp": 3,
+          "fn": 0
+        },
+        "video_metrics": {
+          "precision": 0.5,
+          "recall": 1.0,
+          "f1": 0.6666666666666666
+        }
+      },
+      "test_evaluated": false,
+      "outcome": "no_improvement"
+    },
+    "bonsai_context32": {
+      "model_revision": "b072e1d3b35a0a630cece372c2127528e0994386",
+      "runtime_commit": "e3de715222b2667c54a267441159a5729f11155e",
+      "validation": {
+        "videos": 7,
+        "video_counts": {
+          "tp": 1,
+          "tn": 3,
+          "fp": 1,
+          "fn": 2
+        },
+        "video_metrics": {
+          "precision": 0.5,
+          "recall": 0.3333333333333333,
+          "f1": 0.4
+        }
+      },
+      "processing_success_rate": 1.0,
+      "validation_organizer_anchor_recall_at_internal_3s": 0.0,
+      "validation_max_warm_sec": 71.788,
+      "inference_signatures": [
+        "31c7de66fb11fddd06193a6ab400aab5327e01e5f85f0c831016aa4663386699"
+      ],
+      "test_evaluated": false
+    },
+    "bonsai_detail": {
+      "train_smoke_videos": 2,
+      "train_smoke_positive_videos": 1,
+      "predicted_positive_videos": 0,
+      "completed": 2,
+      "elapsed_sec": 40.837,
+      "initial_connection_failures_before_server_ready": 2,
+      "retried_successfully_same_configuration": 2,
+      "validation_evaluated": false,
+      "outcome": "rejected_on_train_smoke_no_quality_gain"
+    },
+    "qwen": {
+      "revision": "78448d793a7eb2f7a987a1da76d464384aa1becd",
+      "real_inference_evaluated": false,
+      "reason": "incomplete_large_weight_download; setup_time_limit_exceeded"
+    }
+  },
+  "performance": {
+    "weak_cpu_cold": {
+      "candidate": "provisional_weak_binary_temporal_delta",
+      "runs": [
+        {
+          "analysis_sec": 1.1392334869997285,
+          "peak_process_rss_bytes": 604893184,
+          "duration_sec": 142.53333333333333,
+          "frames": 286,
+          "cold_process_sec": 1.8134824569988268
+        },
+        {
+          "analysis_sec": 1.1523611319989868,
+          "peak_process_rss_bytes": 623874048,
+          "duration_sec": 142.53333333333333,
+          "frames": 286,
+          "cold_process_sec": 1.854724990998875
+        },
+        {
+          "analysis_sec": 1.1461139700004424,
+          "peak_process_rss_bytes": 625131520,
+          "duration_sec": 142.53333333333333,
+          "frames": 286,
+          "cold_process_sec": 1.8547703240001283
+        }
+      ],
+      "max_cold_process_sec": 1.8547703240001283,
+      "max_peak_process_rss_bytes": 625131520,
+      "note": "Three fresh Python processes on longest train clip. Disk cache not flushed. Python network connections forbidden. No API/semantic accuracy claim."
+    },
+    "bonsai_cold_train": {
+      "runs": [
+        {
+          "network_interfaces": [
+            "lo"
+          ],
+          "external_routes": 0,
+          "duration_sec": 142.533021,
+          "status": "done",
+          "native_cold_load_sec": 2.040012957997533,
+          "api_cycle_sec": 137.16069331000108,
+          "cold_total_sec": 139.7292179779979,
+          "peak_native_process_vram_bytes": 6268387328,
+          "peak_native_rss_bytes": 6505807872,
+          "peak_api_rss_bytes": 66093056,
+          "max_child_rss_bytes_not_sum": 6505807872
+        }
+      ],
+      "disk_cache_flushed": false,
+      "evidence_shape_check_passed": true
+    },
+    "bonsai_cold_val": {
+      "runs": [
+        {
+          "network_interfaces": [
+            "lo"
+          ],
+          "external_routes": 0,
+          "duration_sec": 72.7,
+          "status": "done",
+          "native_cold_load_sec": 1.784739353999612,
+          "api_cycle_sec": 73.85749940000096,
+          "cold_total_sec": 75.90526589900037,
+          "peak_native_process_vram_bytes": 6268387328,
+          "peak_native_rss_bytes": 6503571456,
+          "peak_api_rss_bytes": 63168512,
+          "max_child_rss_bytes_not_sum": 6503571456
+        },
+        {
+          "network_interfaces": [
+            "lo"
+          ],
+          "external_routes": 0,
+          "duration_sec": 72.7,
+          "status": "done",
+          "native_cold_load_sec": 1.782023264997406,
+          "api_cycle_sec": 71.08702313399772,
+          "cold_total_sec": 73.12774309099768,
+          "peak_native_process_vram_bytes": 6268387328,
+          "peak_native_rss_bytes": 6507544576,
+          "peak_api_rss_bytes": 63504384,
+          "max_child_rss_bytes_not_sum": 6507544576
+        },
+        {
+          "network_interfaces": [
+            "lo"
+          ],
+          "external_routes": 0,
+          "duration_sec": 72.7,
+          "status": "done",
+          "native_cold_load_sec": 1.7857293029992434,
+          "api_cycle_sec": 70.70625300500251,
+          "cold_total_sec": 72.75115970399929,
+          "peak_native_process_vram_bytes": 6268387328,
+          "peak_native_rss_bytes": 6503645184,
+          "peak_api_rss_bytes": 61915136,
+          "max_child_rss_bytes_not_sum": 6503645184
+        }
+      ],
+      "disk_cache_flushed": false,
+      "evidence_shape_check_passed": true
+    }
+  },
+  "pseudo_annotation": {
+    "files_with_proposals_or_empty_model_predictions": 10,
+    "proposed_events_including_duplicate_file": 3,
+    "unprocessed_train_files": 24,
+    "test_files_withheld_from_review_export": 8,
+    "human_reviewed": false
+  },
+  "code_checks": {
+    "pytest_passed": 68,
+    "pytest_seconds": 24.19,
+    "warnings": 1,
+    "note": "Synthetic/API adapter checks do not measure banking detection accuracy."
+  },
+  "limitations": [
+    "Neither classifier is competition ready; all three unique normal test videos trigger the selected binary baseline.",
+    "Only seven unique validation and seven unique test videos; camera/session independence has not been verified.",
+    "No independently reviewed exhaustive typed event annotations: event precision/F1 and semantic class accuracy are unavailable.",
+    "CPU binary weights are rejected by the normative API; the real Bonsai API is experimental and needs backend-owned lifecycle integration.",
+    "Test was evaluated once for the frozen binary candidate; no parameters were changed from its results.",
+    "One earlier frame overview was transmitted to the coding assistant; subsequent inference was local. Do not claim end-to-end preparation without that earlier transmission."
+  ]
+}

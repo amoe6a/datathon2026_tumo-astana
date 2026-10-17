@@ -192,6 +192,64 @@ def test_even_small_decode_loss_is_an_error(tmp_path, monkeypatch):
         sample_video(video)
 
 
+def test_sparse_windows_keep_context_and_final_frame():
+    from ml.qwen import make_windows
+    from ml.video import Frame
+    frames = [Frame(t / 2, None) for t in range(286)]
+    windows = make_windows(frames, window_sec=32, stride_sec=24, sampling_fps=.5)
+    assert len(windows) == 6
+    assert max(map(len, windows)) <= 18
+    assert windows[-1][-1].time == 142.5
+    assert all(b[0].time <= a[-1].time for a, b in zip(windows, windows[1:]))
+    with pytest.raises(ValueError, match='sampling'):
+        make_windows(frames, window_sec=8, stride_sec=12)
+
+
+def test_video_pool_ignores_static_background():
+    import numpy as np
+    from scripts.video_baseline import pooled_features
+    rng = np.random.default_rng(3)
+    x = rng.normal(size=(12, 4608))
+    changed = x.copy()
+    changed[:, :2304] += rng.normal(size=2304)
+    assert np.allclose(pooled_features(x), pooled_features(changed))
+    assert np.isfinite(pooled_features(x)).all()
+    with pytest.raises(ValueError):
+        pooled_features(x[:, :200])
+
+
+def test_truncated_frozen_split_cannot_hide_unscored_videos():
+    from ml.manifest import validate_frozen_split
+    rows = [{'sha256': 'a'}, {'sha256': 'b'}]
+    with pytest.raises(ValueError, match='length'):
+        validate_frozen_split(rows, {'dataset_hashes': ['a', 'b'], 'splits': ['train']})
+    with pytest.raises(ValueError, match='Duplicate'):
+        validate_frozen_split([{'sha256': 'a'}, {'sha256': 'a'}],
+                              {'dataset_hashes': ['a', 'a'], 'splits': ['train', 'val']})
+
+
+def test_machine_proposals_stay_unreviewed_and_test_withheld(tmp_path):
+    import json
+    from scripts.export_pseudo_labels import export
+    rows = [{'sha256': h, 'events': [], 'segments': []} for h in ['a', 'b', 'c']]
+    manifest = tmp_path / 'draft.json'; manifest.write_text(json.dumps({'videos': rows}))
+    split = tmp_path / 'split.json'
+    split.write_text(json.dumps({'dataset_hashes': ['a', 'b', 'c'], 'splits': ['train', 'val', 'test']}))
+    predictions = tmp_path / 'predictions'; predictions.mkdir()
+    proposal = {'rule_id': 'cashier_leaves', 'timecode_sec': 2, 'observation': 'Synthetic proposal only.'}
+    (predictions / '00.json').write_text(json.dumps({'video_sha256': 'a', 'signature': 'one',
+        'status': 'done', 'events': [proposal]}))
+    # A test prediction must remain inaccessible to this review export.
+    (predictions / '02.json').write_text('invalid and must not be read')
+    output = tmp_path / 'review.json'
+    counts = export(manifest, predictions, split, output)
+    result = json.loads(output.read_text())['videos']
+    assert counts == {'done': 1, 'proposed_events': 1, 'missing': 1, 'withheld_test': 1}
+    assert result[0]['proposed_events'] == [proposal] and result[0]['events'] == []
+    assert all(not r['events_reviewed'] and not r['group_reviewed'] for r in result)
+    assert result[2]['pseudo_review']['status'] == 'withheld_final_test'
+
+
 def test_truncated_generation_is_an_error():
     from ml.qwen import check_generation_complete
     with pytest.raises(ValueError, match="Truncated model"):

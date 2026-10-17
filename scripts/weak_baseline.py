@@ -15,7 +15,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import StratifiedGroupKFold
 from scipy.special import expit
 from ml.video import sample_video, features
-from ml.manifest import sha256,source_label_digest
+from ml.manifest import sha256,source_label_digest,validate_frozen_split
 from scripts.evaluate import metrics
 
 
@@ -23,6 +23,7 @@ def freeze_split(rows, path):
     label_hash=source_label_digest(rows)
     if path.exists():
         frozen = json.loads(path.read_text())
+        validate_frozen_split(rows, frozen)
         if frozen['dataset_hashes'] != [r['sha256'] for r in rows]:
             raise ValueError('Frozen split belongs to another dataset')
         if frozen.get('source_labels_sha256',label_hash)!=label_hash:
@@ -113,7 +114,10 @@ def score(rows,splits,cache,scaler,model,threshold,split,variant="original"):
     return {'unique_videos':len(seen),'files':sum(files.values()),
             'video_counts':dict(video),'video_metrics':metrics(video),
             'video_counts_files':dict(files),'video_metrics_files':metrics(files),
-            'event_counts_at_internal_3s':dict(event),'event_metrics':metrics(event),
+            'organizer_anchor_count':event['tp']+event['fn'],
+            'matched_anchors_at_internal_3s':event['tp'],
+            'anchor_recall_at_internal_3s':event['tp']/(event['tp']+event['fn']) if event['tp']+event['fn'] else None,
+            'unmatched_predictions_not_confirmed_false_positives':event['fp'],
             'matched_time_error_median_sec':float(np.median(errors)) if errors else None}
 
 
@@ -147,7 +151,7 @@ def main():
             candidates.append({'config':config,'validation':report})
             # Typed/exhaustive events are unavailable: select on independent
             # organizer binary labels. Single-anchor recall is only a tiebreak.
-            key=(report['video_metrics']['f1'] or 0,report['event_metrics']['recall'] or 0)
+            key=(report['video_metrics']['f1'] or 0,report['anchor_recall_at_internal_3s'] or 0)
             if best_key is None or key>best_key:
                 best_key=key;best=(config,report,scaler,model)
     config,report,scaler,model=best
@@ -162,7 +166,7 @@ def main():
                            'Weak targets are not verified event intervals or semantic types.',
                            'Not integrated with legal rules/API; no real generalization claim.',
                            'Final test not evaluated; 3s is an internal diagnostic tolerance.',
-                           'Event F1 is only a single-anchor proxy: extra true events are not exhaustively labeled.']}
+                           'Only organizer-anchor recall is measurable; event precision/F1 is unavailable without exhaustive labels.']}
     (output/'validation.json').write_text(json.dumps(result,indent=2))
     print(json.dumps({k:v for k,v in result.items() if k!='candidates'},indent=2))
 

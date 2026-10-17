@@ -41,6 +41,7 @@ def main():
         raise RuntimeError('Offline inference may only connect to the configured local model')
     socket.socket.connect=restricted_connect
     from ml.engine import load_rules
+    from ml.manifest import validate_frozen_split
     from ml.qwen import QwenSession,make_windows,parse_events,qwen_prompt
     from ml.video import sample_video,Frame
     from scripts.evaluate import failure_reason
@@ -49,7 +50,7 @@ def main():
         import torch
     manifest=Path(args.manifest);data=json.loads(manifest.read_text());rows=data['videos']
     frozen=json.loads(Path(args.split_file).read_text())
-    if frozen['dataset_hashes']!=[r['sha256'] for r in rows]:raise ValueError('Split/data hash mismatch')
+    validate_frozen_split(rows, frozen)
     rules=load_rules(args.rules)
     prompt=qwen_prompt(rules)
     implementation={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in
@@ -83,7 +84,13 @@ def main():
         if target.exists():
             cached=json.loads(target.read_text())
             if cached.get('signature')!=signature:raise ValueError('Annotation configuration mismatch; use a new output folder')
-            counts['cached']+=1;continue
+            if cached.get('status') == 'done':
+                counts['cached_done']+=1;counts['done']+=1
+                counts['predicted_positive']+=int(bool(cached['events']))
+                continue
+            # Retry technical failures with the same frozen configuration;
+            # a cached failure must never masquerade as a successful resume.
+            counts['retried_incomplete']+=1
         start=time.monotonic()
         record={'record_index':index,'video_sha256':row['sha256'],'signature':signature,
                 'annotation_kind':'local_model_pseudo','human_reviewed':False,'grouping_reviewed':False,
@@ -93,7 +100,7 @@ def main():
             frames,duration=sample_video(manifest.parent/row['path'])
             if args.crop_top<1:
                 frames=[Frame(f.time,f.bgr[:round(f.bgr.shape[0]*args.crop_top)]) for f in frames]
-            windows=make_windows(frames)
+            windows=make_windows(frames, **getattr(session, 'window_settings', {}))
             for window in windows:
                 raw=session.infer(window,prompt)
                 found,uncertain=parse_events(raw,rules,window[0].time,window[-1].time)

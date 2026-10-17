@@ -24,6 +24,22 @@ def source_label_digest(rows):
     return hashlib.sha256(json.dumps(labels, sort_keys=True).encode()).hexdigest()
 
 
+def validate_frozen_split(rows, frozen):
+    splits = frozen.get('splits', [])
+    if frozen.get('dataset_hashes') != [r['sha256'] for r in rows] or len(splits) != len(rows):
+        raise ValueError('Frozen split/data length or hash mismatch')
+    if any(s not in ('train', 'val', 'test') for s in splits):
+        raise ValueError('Unknown frozen split')
+    if 'source_labels_sha256' in frozen and frozen['source_labels_sha256'] != source_label_digest(rows):
+        raise ValueError('Organizer labels changed after split freeze')
+    seen = {}
+    for row, split in zip(rows, splits):
+        if row['sha256'] in seen and seen[row['sha256']] != split:
+            raise ValueError('Duplicate leakage in frozen split')
+        seen[row['sha256']] = split
+    return splits
+
+
 def finite_number(value):
     return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
 
