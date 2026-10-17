@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.env
+data/
+models/
+runtime/
+*.log
+*.mov
+*.mp4
+*.npz

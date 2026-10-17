@@ -1,0 +1,51 @@
+{
+  "version": "2026-10-17",
+  "source_verified_on": "2026-10-17",
+  "source_note": "Sections 19-25 and 31-32 read on the official Adilet rendered page. The event interpretations are conservative review prompts, not legal findings. Confirm applicability after inspecting the dataset.",
+  "rules": [
+    {
+      "id": "cashier_leaves", "name": "Possible departure before customer service is complete",
+      "document": "NBK Resolution No. 231 of 29 November 2019", "section": "Paragraph 22",
+      "url": "https://adilet.zan.kz/rus/docs/V1900019680",
+      "summary": "A cashier must not leave the workplace before customer service is complete.",
+      "visual_test": "Cashier visibly leaves the workstation while the same customer's cash-receipt service is visibly ongoing. Require the departure and ongoing interaction to be visible. Merely standing, reaching or moving within the workstation is not leaving.",
+      "caution": "Confirm the transaction was still in progress; an empty workstation after service is not sufficient.",
+      "enabled": true, "demo_only": false
+    },
+    {
+      "id": "previous_cash_exposed", "name": "Possible failure to store previously received cash",
+      "document": "NBK Resolution No. 231 of 29 November 2019", "section": "Paragraph 20",
+      "url": "https://adilet.zan.kz/rus/docs/V1900019680",
+      "summary": "Previously accepted cash belongs in dedicated lockable storage; the cash on the workstation is that of the customer being served.",
+      "visual_test": "A visible completed receipt from customer A is followed by service of customer B while the same identifiable cash from A remains exposed on the work surface. Both the transaction transition and cash continuity must be visible.",
+      "caution": "Cash on a desk alone is not a violation. Do not infer ownership, previous acceptance or lock state from an isolated frame.",
+      "enabled": true, "demo_only": false
+    },
+    {
+      "id": "receipt_count_absent", "name": "Possible omitted counting during cash receipt",
+      "document": "NBK Resolution No. 231 of 29 November 2019", "section": "Paragraphs 19(2) and 20",
+      "url": "https://adilet.zan.kz/rus/docs/V1900019680",
+      "summary": "Receipt involves counting banknotes and coins with the customer present.",
+      "visual_test": "The complete receipt of loose banknotes is visible from handover through storage, with hands and any counting device continuously visible, and the cash is stored without any counting action. Report only if this entire action is contained in the observed sequence.",
+      "caution": "Sparse sampling or an obscured/off-camera counter cannot establish that counting was omitted. Payout exceptions in paragraph 32 must not be mistaken for receipt rules.",
+      "enabled": false, "demo_only": false
+    },
+    {
+      "id": "bag_check_absent", "name": "Possible omitted collection bag check",
+      "document": "NBK Resolution No. 231 of 29 November 2019", "section": "Paragraph 24(3)-(4)",
+      "url": "https://adilet.zan.kz/rus/docs/V1900019680",
+      "summary": "Receipt from a collection service includes checking the bag's integrity and sealing.",
+      "visual_test": "A complete bag receipt is visible, including bag, seal and cashier's actions, with no inspection before acceptance. Requires sufficient view of the full sequence.",
+      "caution": "A brief or occluded interaction cannot prove absence of inspection. A bag alone is not evidence of a violation.",
+      "enabled": false, "demo_only": false
+    },
+    {
+      "id": "demo_absent", "name": "Synthetic test: operator marker absent",
+      "document": "Synthetic fixture specification", "section": "Test condition A",
+      "url": "", "summary": "The blue operator marker disappears while the green test object remains.",
+      "visual_test": "Synthetic geometric test scene only.",
+      "caution": "This is not a banking rule or an assessment of a real cashier.",
+      "enabled": true, "demo_only": true
+    }
+  ]
+}

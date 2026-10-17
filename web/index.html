@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Forte Review · Video evidence</title><link rel="stylesheet" href="/assets/style.css"></head>
+<body>
+<header><a class="brand" href="/" aria-label="Forte Review home"><span class="mark">f<span>•</span></span>forte<span class="brand-light">review</span></a><div class="header-right"><span class="pill"><i></i> Local analysis</span><span class="small">DATATHON 2026</span></div></header>
+<main>
+  <div class="eyebrow">CASH OPERATIONS / VIDEO REVIEW</div>
+  <section class="intro"><div><h1>From video to<br><em>verifiable evidence.</em></h1><p>Find moments that need attention. Review the action,<br class="desktop"> the timestamp and the rule in one place.</p></div><div class="principles"><span>01 <b>Upload a recording</b></span><span>02 <b>Analyze locally</b></span><span>03 <b>Review the evidence</b></span></div></section>
+  <div id="mode" class="notice" hidden></div>
+  <div class="workspace">
+    <aside class="panel upload-panel"><div class="section-label"><span class="number">01</span> Recording</div><h2>Start a review</h2><p class="muted">Video stays within this service. No cloud AI processing.</p>
+      <form id="uploadForm"><label for="apiKey" class="field-label">Access key</label><input id="apiKey" type="password" placeholder="Enter the team access key" autocomplete="off" required minlength="16"><p class="hint">Used for this session only. Never saved in the browser.</p>
+      <label class="drop" id="drop" for="videoFile"><span class="upload-icon">↑</span><strong id="fileName">Choose a video</strong><span>or drop it here</span><small>MOV / MP4 · up to 64 MB · 180 sec</small><input id="videoFile" type="file" accept=".mov,.mp4,video/quicktime,video/mp4"></label>
+      <button class="primary" id="analyze" type="submit">Analyze recording <span>→</span></button></form>
+      <div id="examples" hidden><div class="divider"></div><p class="field-label">Explore synthetic examples</p><div class="example-buttons"><button type="button" data-example="normal">Normal</button><button type="button" data-example="multiple">Two events</button></div><p class="hint">Generated shapes, not bank footage.</p></div>
+      <div id="progressBox" hidden><div class="progress-top"><b id="stage">Starting</b><span id="elapsed">0s</span></div><progress id="progress" max="100" value="0"></progress><p class="hint">Keep this page open. Large clips may take a few minutes.</p></div>
+      <p id="error" role="alert" hidden></p>
+    </aside>
+    <section class="panel review-panel" aria-live="polite"><div class="section-label"><span class="number">02</span> Evidence review <span id="jobLabel"></span></div>
+      <div id="empty"><div class="empty-graphic"><span></span><span></span><span></span><b>▶</b></div><h2>A clear finding starts with a frame.</h2><p>Your result will connect each possible event to<br>its exact moment and a reviewable rule.</p><div class="empty-tags"><span>Timestamp</span><span>Source frames</span><span>Rule reference</span></div></div>
+      <div id="results" hidden><div class="result-top"><div><span id="verdictTag" class="verdict-tag"></span><h2 id="verdict"></h2></div><span id="duration" class="metric"></span></div><p id="resultNote" class="muted"></p>
+        <video id="player" controls playsinline hidden></video><p id="playbackHint" class="hint" hidden>Some MOV codecs cannot play in this browser. The source frames below remain available.</p>
+        <div id="timeline" class="timeline"></div><div id="eventList"></div><div id="warnings" class="warnings"></div>
+      </div>
+    </section>
+  </div>
+  <footer><b>Evidence supports the reviewer.</b> Findings indicate possible issues and require human review.<span>Forte Review · Team prototype</span></footer>
+</main><script src="/assets/app.js" defer></script></body></html>

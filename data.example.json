@@ -1,0 +1,8 @@
+{
+  "note": "Paths are relative to this manifest. Add event types and explicit visible intervals locally. Organizers provide binary labels and a timestamp, not this complete schema. This is not training data.",
+  "videos": [
+    {"path":"videos/receipt_01.mov","group":"session_01_camera_A","split":"train","segments":[{"start":0,"end":8,"label":"normal"},{"start":10,"end":13,"label":"cashier_leaves"}],"events":[{"time":11,"label":"cashier_leaves"}]},
+    {"path":"videos/normal_02.mov","group":"session_02_camera_A","split":"train","segments":[{"start":0,"end":20,"label":"normal"}],"events":[]},
+    {"path":"videos/heldout_03.mov","group":"session_03_camera_B","split":"val","segments":[],"events":[{"time":12,"label":"cashier_leaves"}]}
+  ]
+}
