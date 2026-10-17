@@ -104,6 +104,88 @@
   .step-visual { aspect-ratio: 16 / 8; max-height: 270px; }
   .step-body { padding: 23px; }
 }
+/* Reference books illustrate the source catalog; the real rules stay below. */
+.sources-overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
+  align-items: center;
+  gap: clamp(28px, 4vw, 64px);
+}
+.sources-copy { min-width: 0; }
+.sources-copy .section-heading { margin-bottom: 25px; }
+.sources-copy .sources-toolbar {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 27px;
+}
+.sources-copy .sources-toolbar .hint { margin-top: 0; max-width: 440px; }
+.sources-copy .sources-toolbar button { min-width: 184px; }
+.sources-photo { margin: 0; min-width: 0; }
+.sources-visual {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  aspect-ratio: 4 / 3;
+  max-height: 340px;
+  border: 1px solid #69516b;
+  border-radius: 12px 12px 32px 12px;
+  background: #201924;
+}
+.sources-visual img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 57% 48%;
+  filter: saturate(.48) brightness(.76) contrast(1.06);
+}
+.sources-visual::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #2413272b 0%, #1b102010 45%, #160f21ed 100%);
+  pointer-events: none;
+}
+.sources-visual .source-emblem {
+  display: grid;
+  place-items: center;
+  position: absolute;
+  top: 18px;
+  right: 19px;
+  z-index: 1;
+  width: 56px;
+  height: 66px;
+  font-size: 52px;
+  color: #efc4d5;
+  background: #1a1028b8;
+  border: 1px solid #d8acc52e;
+  border-radius: 8px;
+  backdrop-filter: blur(8px);
+}
+.sources-visual-caption {
+  position: absolute;
+  z-index: 1;
+  left: 22px;
+  right: 16px;
+  bottom: 22px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 11px;
+  font: 9px/1.6 var(--mono);
+  letter-spacing: .8px;
+  color: #e8dcea;
+}
+.sources-visual-caption span { color: var(--accent); }
+.sources-photo .photo-credits { margin-top: 10px; text-align: right; }
+.sources-section .source-list:empty { margin-top: 0; }
+@media (max-width: 780px) {
+  .sources-overview { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .sources-visual { aspect-ratio: 16 / 10; max-height: 310px; }
+  .sources-copy .section-heading { margin-bottom: 20px; }
+  .sources-copy .sources-toolbar { margin-top: 22px; gap: 14px; }
+}
 /* Decorative satellites share the exact center and radius of the visible rings. */
 .orbits {
   background: radial-gradient(ellipse at center, #6c31522b, transparent 61%);
