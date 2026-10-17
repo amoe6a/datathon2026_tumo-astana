@@ -1,28 +1,82 @@
 <!doctype html>
-<html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Forte Review · Video evidence</title><link rel="stylesheet" href="/assets/style.css"></head>
-<body>
-<header><a class="brand" href="/" aria-label="Forte Review home"><span class="mark">f<span>•</span></span>forte<span class="brand-light">review</span></a><div class="header-right"><span class="pill"><i></i> Local analysis</span><span class="small">DATATHON 2026</span></div></header>
-<main>
-  <div class="eyebrow">CASH OPERATIONS / VIDEO REVIEW</div>
-  <section class="intro"><div><h1>From video to<br><em>verifiable evidence.</em></h1><p>Find moments that need attention. Review the action,<br class="desktop"> the timestamp and the rule in one place.</p></div><div class="principles"><span>01 <b>Upload a recording</b></span><span>02 <b>Analyze locally</b></span><span>03 <b>Review the evidence</b></span></div></section>
-  <div id="mode" class="notice" hidden></div>
-  <div class="workspace">
-    <aside class="panel upload-panel"><div class="section-label"><span class="number">01</span> Recording</div><h2>Start a review</h2><p class="muted">Video stays within this service. No cloud AI processing.</p>
-      <form id="uploadForm"><label for="apiKey" class="field-label">Access key</label><input id="apiKey" type="password" placeholder="Enter the team access key" autocomplete="off" required minlength="16"><p class="hint">Used for this session only. Never saved in the browser.</p>
-      <label class="drop" id="drop" for="videoFile"><span class="upload-icon">↑</span><strong id="fileName">Choose a video</strong><span>or drop it here</span><small>MOV / MP4 · up to 64 MB · 180 sec</small><input id="videoFile" type="file" accept=".mov,.mp4,video/quicktime,video/mp4"></label>
-      <button class="primary" id="analyze" type="submit">Analyze recording <span>→</span></button></form>
-      <div id="examples" hidden><div class="divider"></div><p class="field-label">Explore synthetic examples</p><div class="example-buttons"><button type="button" data-example="normal">Normal</button><button type="button" data-example="multiple">Two events</button></div><p class="hint">Generated shapes, not bank footage.</p></div>
-      <div id="progressBox" hidden><div class="progress-top"><b id="stage">Starting</b><span id="elapsed">0s</span></div><progress id="progress" max="100" value="0"></progress><p class="hint">Keep this page open. Large clips may take a few minutes.</p></div>
-      <p id="error" role="alert" hidden></p>
-    </aside>
-    <section class="panel review-panel" aria-live="polite"><div class="section-label"><span class="number">02</span> Evidence review <span id="jobLabel"></span></div>
-      <div id="empty"><div class="empty-graphic"><span></span><span></span><span></span><b>▶</b></div><h2>A clear finding starts with a frame.</h2><p>Your result will connect each possible event to<br>its exact moment and a reviewable rule.</p><div class="empty-tags"><span>Timestamp</span><span>Source frames</span><span>Rule reference</span></div></div>
-      <div id="results" hidden><div class="result-top"><div><span id="verdictTag" class="verdict-tag"></span><h2 id="verdict"></h2></div><span id="duration" class="metric"></span></div><p id="resultNote" class="muted"></p>
-        <video id="player" controls playsinline hidden></video><p id="playbackHint" class="hint" hidden>Some MOV codecs cannot play in this browser. The source frames below remain available.</p>
-        <div id="timeline" class="timeline"></div><div id="eventList"></div><div id="warnings" class="warnings"></div>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Локальный анализ кассовых операций: события, таймкоды и кадры для проверки человеком.">
+  <title>Forte Review — от видео к доказательству</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/assets/style.css">
+  <script src="/assets/app.js" defer></script>
+</head>
+<body id="top">
+  <a class="skip-link" href="#review">Перейти к проверке</a>
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="Forte Review — в начало"><span class="brand-mark" aria-hidden="true">f<span>↗</span></span><span>forte<span class="brand-light">review</span></span></a>
+    <nav aria-label="Основная навигация"><a class="nav-active" href="#review">Проверка</a><a href="#how-it-works">Как работает</a><a href="#sources">Источники</a></nav>
+    <span id="serviceStatus" class="service-status" role="status"><i aria-hidden="true"></i><span>Проверяем сервис</span></span>
+  </header>
+  <main class="page-frame">
+    <section class="hero" aria-labelledby="heroTitle">
+      <div id="backgroundOrbits" class="orbits" aria-hidden="true"><span></span><span></span><span></span><span></span><i class="planet planet-one"></i><i class="planet planet-two"></i><i class="planet planet-three"></i></div>
+      <div class="hero-content">
+        <p class="eyebrow"><span class="spark" aria-hidden="true">✳</span> ВИДЕОАНАЛИТИКА КАССОВЫХ ОПЕРАЦИЙ</p>
+        <h1 id="heroTitle">За каждым выводом —<br><span class="gradient-text">конкретный кадр.</span></h1>
+        <p class="hero-description">AI находит моменты, требующие внимания.<br>Вы проверяете событие, доказательства и правило.</p>
+        <a class="hero-link" href="#review">Начать проверку <span aria-hidden="true">↗</span></a>
+        <button id="motionToggle" class="motion-toggle" type="button" aria-pressed="false" aria-label="Включить движение фоновых орбит" hidden>Оживить фон</button>
       </div>
+      <div class="workspace-wrap" id="review">
+        <div class="workspace-shell">
+          <div class="workspace-bar"><span><i class="tiny-mark" aria-hidden="true"></i> FORTE REVIEW <span class="bar-divider">/</span> НОВАЯ ПРОВЕРКА</span><span class="local-label">Внутри вашего сервиса <span aria-hidden="true">↗</span></span></div>
+          <div id="demoNotice" class="notice" hidden>Синтетическая демонстрация. Геометрические сцены проверяют работу сервиса, а не качество распознавания банковских операций.</div>
+          <div class="workspace-grid">
+            <section class="upload-panel" aria-labelledby="uploadTitle">
+              <div class="section-kicker">01 / ВАША ЗАПИСЬ</div><h2 id="uploadTitle">Начните с видео</h2><p class="muted">Загрузите запись кассовой операции.<br>Анализ выполняется локальной моделью.</p>
+              <form id="uploadForm" novalidate>
+                <label class="field-label" for="apiKey">Ключ доступа <span>Только на время сеанса</span></label>
+                <input id="apiKey" type="password" autocomplete="off" spellcheck="false" placeholder="Введите API-ключ команды" aria-describedby="keyHint keyError" required>
+                <p id="keyHint" class="hint">Ключ нужен для подключения к API. Он не сохраняется в браузере.</p><p id="keyError" class="field-error" hidden></p>
+                <label id="dropzone" class="dropzone" for="videoFile">
+                  <span class="upload-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 16V4m-4 4 4-4 4 4M4 15v5h16v-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  <strong id="fileName">Перетащите видео сюда</strong><span id="fileDetail">или нажмите, чтобы выбрать файл</span><small>MOV / MP4 · до 64 МБ · до 180 секунд</small>
+                  <input id="videoFile" type="file" accept=".mov,.mp4,video/quicktime,video/mp4" aria-label="Выбрать видео для анализа" aria-describedby="fileError">
+                </label><p id="fileError" class="field-error" hidden></p>
+                <button id="analyzeButton" class="primary-button" type="submit"><span>Анализировать видео</span><span aria-hidden="true">↗</span></button>
+              </form>
+              <div id="demoExamples" class="demo-examples" hidden><p class="eyebrow">ПОПРОБОВАТЬ НА СИНТЕТИКЕ</p><div><button type="button" class="quiet-button" data-example="normal">Normal · без события</button><button type="button" class="quiet-button" data-example="multiple">Two events · два события</button></div></div>
+            </section>
+            <section class="preview-panel" aria-labelledby="previewTitle">
+              <div class="preview-heading"><span id="previewTitle" class="section-kicker">02 / ОБЛАСТЬ ПРОСМОТРА</span><span id="fileBadge" class="badge" hidden>ФАЙЛ ВЫБРАН</span></div>
+              <div class="preview-stage">
+                <div id="previewEmpty" class="preview-empty"><div class="aperture" aria-hidden="true"><div class="aperture-core"><svg viewBox="0 0 48 48" fill="none"><path d="M14 10h20v28H14zM19 18h10M19 24h10M19 30h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div><span class="orbit-node node-a"></span><span class="orbit-node node-b"></span></div><h3>Увидеть. Проверить. Обосновать.</h3><p>Ваша запись и доказательства<br>появятся здесь после загрузки.</p></div>
+                <video id="player" controls playsinline preload="metadata" hidden aria-label="Загруженное видео"></video>
+                <div id="playbackFallback" class="playback-fallback" hidden><span aria-hidden="true">↗</span><h3>Предпросмотр недоступен</h3><p>Этот кодек может не поддерживаться браузером. Можно запустить анализ — кадры-доказательства будут доступны отдельно.</p></div>
+              </div>
+              <div class="evidence-flow" aria-label="Последовательность проверки"><span><i aria-hidden="true">01</i> Видео</span><b aria-hidden="true">→</b><span><i aria-hidden="true">02</i> Событие</span><b aria-hidden="true">→</b><span><i aria-hidden="true">03</i> Основание</span></div>
+              <div id="processingPanel" class="processing-panel" role="status" aria-live="polite" hidden><div class="processing-top"><span id="stageText">Подготовка</span><span id="elapsedText" class="mono">00:00</span></div><progress id="progressBar" max="100" aria-label="Ход обработки"></progress><p id="progressDetail" class="hint">Оставьте страницу открытой до завершения проверки.</p></div>
+              <div id="errorBox" class="error-box" role="alert" tabindex="-1" hidden><strong>Проверка не завершена</strong><p id="errorText"></p><button id="resumeButton" class="quiet-button" type="button" hidden>Проверить статус задания</button></div>
+              <button id="resetButton" type="button" class="text-button" hidden>Выбрать другое видео ↗</button>
+            </section>
+          </div>
+        </div>
+        <div class="workspace-shadow" aria-hidden="true"></div>
+      </div>
+      <p class="hero-footnote"><span aria-hidden="true">↳</span> Локальная обработка <i aria-hidden="true"></i> Без анализа звука <i aria-hidden="true"></i> Решение остаётся за человеком</p>
     </section>
-  </div>
-  <footer><b>Evidence supports the reviewer.</b> Findings indicate possible issues and require human review.<span>Forte Review · Team prototype</span></footer>
-</main><script src="/assets/app.js" defer></script></body></html>
+    <section id="resultSection" class="results-section section-pad" aria-labelledby="resultTitle" hidden>
+      <div class="section-kicker">РЕЗУЛЬТАТ / <span id="jobLabel" class="mono"></span></div><div class="result-header"><div><p id="verdictBadge" class="result-badge"></p><h2 id="resultTitle" tabindex="-1"></h2></div><p id="resultMetrics" class="mono muted"></p></div><p id="resultNote" class="muted"></p>
+      <div id="resultDemoNotice" class="notice" hidden>СИНТЕТИЧЕСКИЙ ПРИМЕР · Не является оценкой банковского видео.</div><div id="eventTimeline" class="event-timeline" aria-label="Переходы к событиям"></div><div id="eventList" class="event-list"></div><div id="warningList" class="warning-list" aria-label="Ограничения анализа"></div>
+    </section>
+    <section id="how-it-works" class="how-section section-pad" aria-labelledby="howTitle"><div class="section-heading"><div><p class="section-kicker">ОТ ЗАПИСИ К ПРОВЕРЯЕМОМУ ВЫВОДУ</p><h2 id="howTitle">Всё начинается с фактов.</h2></div><p class="muted">Три шага, чтобы разобраться<br>в моменте, который важен.</p></div><div class="steps-grid">
+      <article class="step-card"><div class="step-top"><span class="step-number">01</span><span aria-hidden="true">↗</span></div><h3>Загрузите запись</h3><p>Выберите MOV или MP4. Сервис принимает файл и запускает локальный анализ.</p><div class="card-foot">ВИДЕО <span aria-hidden="true">→</span></div></article>
+      <article class="step-card"><div class="step-top"><span class="step-number">02</span><span aria-hidden="true">↗</span></div><h3>Найдите момент</h3><p>Перейдите к таймкоду события. Сопоставьте описание с исходными кадрами.</p><div class="card-foot">ДОКАЗАТЕЛЬСТВО <span aria-hidden="true">→</span></div></article>
+      <article class="step-card"><div class="step-top"><span class="step-number">03</span><span aria-hidden="true">↗</span></div><h3>Проверьте основание</h3><p>Изучите правило, условия его применения и ограничения. Окончательную оценку даёт человек.</p><div class="card-foot">ЧЕЛОВЕК ПРИНИМАЕТ РЕШЕНИЕ <span aria-hidden="true">↗</span></div></article>
+    </div></section>
+    <section id="sources" class="sources-section section-pad" aria-labelledby="sourcesTitle"><div class="section-heading"><div><p class="section-kicker">ОСНОВАНИЕ ИМЕЕТ ЗНАЧЕНИЕ</p><h2 id="sourcesTitle">Источник рядом с выводом.</h2></div><span class="source-emblem" aria-hidden="true">§</span></div><p class="muted sources-intro">Каждое событие связано с правилом из каталога сервиса. Название документа, точный пункт и ограничения доступны в результате проверки.</p><div class="sources-toolbar"><p id="sourcesStatus" class="hint" role="status">Введите ключ доступа выше, чтобы посмотреть фактический каталог.</p><button id="loadRulesButton" class="quiet-button" type="button">Загрузить каталог <span aria-hidden="true">↗</span></button></div><div id="sourceList" class="source-list"></div></section>
+    <footer><a class="brand footer-brand" href="#top">forte<span class="brand-light">review</span></a><p>AI помогает заметить.<br>Человек — разобраться.</p><span class="footer-note">Командный прототип / Datathon 2026</span></footer>
+  </main>
+  <dialog id="frameDialog" aria-labelledby="frameDialogTitle"><div class="dialog-top"><h2 id="frameDialogTitle">Кадр-доказательство</h2><button id="closeDialog" type="button" class="quiet-button">Закрыть <span aria-hidden="true">×</span></button></div><img id="expandedFrame" alt=""><p id="expandedCaption" class="mono"></p></dialog>
+</body>
+</html>
