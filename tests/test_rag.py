@@ -54,6 +54,16 @@ def test_blank_input_is_not_treated_as_clean_video():
     assert readable([Frame(0,image)])
 
 
+def test_all_unreadable_selected_windows_fail_instead_of_returning_clean():
+    from ml.qwen_rag import RagSession
+    session=RagSession.__new__(RagSession)
+    session.config={'window_sec':180,'stride_sec':180,'frames_per_window':2}
+    frames=[Frame(float(i),np.zeros((64,64,3),dtype=np.uint8)) for i in range(20)]
+    for i in [7,8]:frames[i].bgr[:32]=180
+    assert readable(frames)
+    with pytest.raises(ValueError,match='No readable analysis window'):session.analyze(frames)
+
+
 def test_missing_uncertainty_is_conservative_but_missing_events_fails():
     events,uncertain=validate_decisions({'events':[]},[],[0.])
     assert events==[] and uncertain is True
@@ -96,6 +106,31 @@ def test_changed_rules_require_translation_review(tmp_path):
     with pytest.raises(ValueError,match='out of date'):index.prompt_card(index.by_id['CASH-001'],'en')
 
 
+def test_temporal_supervision_uses_human_anchor_without_inventing_rule_labels():
+    import json
+    from ml.scene import annotation_target
+    row={'annotations':['Synthetic manually reviewed action.'],'binary_label':1,'anchors':[2.]}
+    target=json.loads(annotation_target(row,'timeline'))
+    assert target=={'scene':row['annotations'][0],'review_times':[2.]}
+    row['binary_label']=0
+    assert json.loads(annotation_target(row,'timeline'))['review_times']==[]
+    row.update(binary_label=1,anchors=[])
+    with pytest.raises(ValueError):annotation_target(row,'timeline')
+
+
+def test_triage_supervision_uses_only_organizer_label():
+    from ml.scene import annotation_target
+    assert annotation_target({'binary_label':1},'triage')=='REVIEW'
+    assert annotation_target({'binary_label':0},'triage')=='NORMAL'
+    with pytest.raises(ValueError):annotation_target({'binary_label':2},'triage')
+
+
+@pytest.mark.parametrize('times',[[99.],[True],[float('nan')],'2.0'])
+def test_scene_proposals_must_be_grounded_and_do_not_approve_events(times):
+    from ml.qwen_rag import validate_timeline
+    with pytest.raises(ValueError):validate_timeline({'scene':'Synthetic visible action.','review_times':times},[0.,2.,4.])
+
+
 def test_rag_events_keep_jury_schema_and_real_evidence(tmp_path,monkeypatch):
     import base64
     import json
@@ -116,3 +151,19 @@ def test_rag_events_keep_jury_schema_and_real_evidence(tmp_path,monkeypatch):
     for frame in event['evidence_frames']:
         pixels=cv2.imdecode(np.frombuffer(base64.b64decode(frame['image_base64']),np.uint8),cv2.IMREAD_COLOR)
         assert pixels is not None
+
+
+def test_refinement_cannot_add_unproposed_rule_or_retain_rejected_candidate():
+    import json
+    from ml.qwen_rag import RagSession
+    session=RagSession.__new__(RagSession)
+    session.config={'refine_frames':4};session.diagnostics=[]
+    session.retriever=RuleRetriever(ROOT/'rules/rag')
+    pixels=np.zeros((64,64,3),dtype=np.uint8);pixels[:32]=180
+    frames=[Frame(float(i),pixels) for i in range(4)]
+    proposals=[{'rule_id':'CASH-001','timecode_sec':2.,'observation':'Synthetic proposal.'}]
+    cards=[session.retriever.by_id[k] for k in ['CASH-001','CASH-003']]
+    session.generate=lambda *a,**kw:json.dumps({'events':[],'uncertain':True})
+    assert session.refine(frames,proposals,cards)==([],True)
+    session.generate=lambda *a,**kw:json.dumps(decision('CASH-003'))
+    with pytest.raises(ValueError,match='unknown retrieved rule'):session.refine(frames,proposals,cards)

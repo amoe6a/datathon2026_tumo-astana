@@ -32,9 +32,14 @@ def main(args):
         schema=decision_schema(cards,[0.,1.,2.])))
     events,_=validate_decisions(multilingual,cards,[0.,1.,2.])
     assert len(events)==1 and any('\u0400'<=c<='\u052f' for c in events[0]['observation'])
+    # Exercise observation, local retrieval and visual verification, not only load.
+    pattern=np.zeros((96,128,3),dtype=np.uint8);pattern[:48]=160
+    pipeline_events,pipeline_warnings=session.analyze([Frame(t,pattern.copy()) for t in [0.,1.,2.]])
+    assert isinstance(pipeline_events,list) and isinstance(pipeline_warnings,list)
     assert len(attempts)==0
     result={'passed':True,'network_connect_attempts':len(attempts),'synthetic_only':True,'cyrillic_event_schema_passed':True,
-            'seconds':round(time.monotonic()-before,3),'scope':'Model load, tokenizer, constrained GPU generation and local rule catalog load'}
+            'full_synthetic_pipeline_passed':True,
+            'seconds':round(time.monotonic()-before,3),'scope':'Model load, tokenizer, constrained GPU generation and complete synthetic analysis pipeline'}
     Path(args.output).write_text(json.dumps(result,indent=2));print(json.dumps(result))
 
 

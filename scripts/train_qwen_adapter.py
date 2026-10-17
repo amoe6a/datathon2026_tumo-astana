@@ -14,7 +14,7 @@ os.environ.update(HF_HUB_OFFLINE='1', TRANSFORMERS_OFFLINE='1', HF_HUB_DISABLE_T
 def train(args):
     import torch
     from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
-    from ml.scene import load_base, visual_content, select_frames, SCENE_PROMPT
+    from ml.scene import load_base, visual_content, select_frames, SCENE_PROMPT, TIMELINE_PROMPT, TRIAGE_PROMPT, annotation_target
     from ml.video import sample_video
     random.seed(args.seed);torch.manual_seed(args.seed)
     output=Path(args.output);output.mkdir(parents=True,exist_ok=False)
@@ -24,11 +24,12 @@ def train(args):
         raise ValueError('No training videos')
     start=time.monotonic()
     report={'status':'loading','seed':args.seed,'training_videos':len(train_rows),
-        'epochs_requested':args.epochs,'objective':'human annotation supervised scene description',
+        'epochs_requested':args.epochs,'objective':args.objective,
         'base_model':str(Path(args.model).resolve()),'quantization':'NF4 double quantization',
         'manifest_sha256':hashlib.sha256(Path(args.manifest).read_bytes()).hexdigest(),
         'rank':8,'learning_rate':args.learning_rate,'gradient_accumulation':4,
         'vision_encoder_frozen':True,'steps':[],'checkpoints':[]}
+    report.update(frames=args.frames,image_side=args.image_side,frozen_bf16=args.frozen_bf16)
     report['source_sha256']={str(p.relative_to(Path(__file__).resolve().parents[1])):
         hashlib.sha256(p.read_bytes()).hexdigest() for p in [Path(__file__).resolve(),Path(__file__).resolve().parents[1]/'ml/scene.py']}
     def save():
@@ -39,6 +40,15 @@ def train(args):
     model,processor=load_base(args.model,quantized=True,training=True)
     model=prepare_model_for_kbit_training(model,use_gradient_checkpointing=True,
         gradient_checkpointing_kwargs={'use_reentrant':False})
+    if args.frozen_bf16:
+        if not torch.cuda.is_bf16_supported():raise ValueError('BF16 training requires supported CUDA hardware')
+        # PEFT promotes unquantized weights to FP32. The frozen vision tower,
+        # embeddings and output projection otherwise exhaust an 8 GB device.
+        # Keep language normalization and subsequently created adapters in FP32.
+        for name,param in model.named_parameters():
+            if not param.requires_grad and param.dtype==torch.float32 and (
+                '.visual.' in name or 'embed_tokens.' in name or 'lm_head.' in name):
+                param.data=param.data.to(torch.bfloat16)
     targets=[name for name,_ in model.named_modules()
              if 'language_model.layers.' in name and name.endswith(('.q_proj','.v_proj'))]
     if not targets:raise ValueError('Could not locate language-only adapter targets')
@@ -52,10 +62,11 @@ def train(args):
     cache=[]
     for row in train_rows:
         frames,duration=sample_video(row['path'],fps=1)
-        selected=select_frames(frames,args.frames,row['anchors'])
+        selected=select_frames(frames,args.frames,() if args.objective=='triage' else row['anchors'])
         # Keep complete manually supplied annotations, without generating pseudo-ground-truth.
-        answer='\n'.join(row['annotations'])
-        messages=[{'role':'user','content':visual_content(selected,SCENE_PROMPT,side=384)}]
+        answer=annotation_target(row,args.objective)
+        task={'timeline':TIMELINE_PROMPT,'scene':SCENE_PROMPT,'triage':TRIAGE_PROMPT}[args.objective]
+        messages=[{'role':'user','content':visual_content(selected,task,side=args.image_side)}]
         prompt=processor.apply_chat_template(messages,tokenize=True,add_generation_prompt=True,
             return_dict=True,return_tensors='pt')
         full=processor.apply_chat_template(messages+[{'role':'assistant','content':answer}],
@@ -102,7 +113,9 @@ def train(args):
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--model',required=True);p.add_argument('--manifest',required=True)
     p.add_argument('--output',required=True);p.add_argument('--epochs',type=int,default=4)
+    p.add_argument('--objective',choices=['scene','timeline','triage'],default='scene')
     p.add_argument('--frames',type=int,default=8);p.add_argument('--learning-rate',type=float,default=1e-4)
+    p.add_argument('--image-side',type=int,default=384);p.add_argument('--frozen-bf16',action='store_true')
     p.add_argument('--seed',type=int,default=20261017);p.add_argument('--max-microsteps',type=int,default=0)
     a=p.parse_args()
     try:train(a)

@@ -19,6 +19,36 @@ SCENE_PROMPT = (
     'If no relevant people or actions are visible, say so. Keep the description concise.'
 )
 
+TIMELINE_PROMPT = SCENE_PROMPT + (
+    ' Return ONLY JSON with two fields: "scene" (the visible scene and action description), '
+    'and "review_times" (an array of source-frame timestamps for candidate suspicious interactions, '
+    'or an empty array when none are apparent). Candidate times are proposals for a later rule check, '
+    'not legal conclusions. Do not invent a suspicious interaction merely to fill the array.'
+)
+
+TRIAGE_PROMPT = (
+    'Classify this complete chronological bank-counter video for manual review. '
+    'Use visible cashier/customer actions and cash-handling interactions, not identity, '
+    'background appearance, amounts, accounting data or intent. '
+    'Respond with exactly REVIEW if the visible interaction contains a potentially improper '
+    'cash-handling or security action, or NORMAL if no such action is apparent. '
+    'This is a review-priority prediction, not a legal conclusion.'
+)
+
+
+def annotation_target(row,objective='scene'):
+    if objective=='triage':
+        if row['binary_label'] not in (0,1):raise ValueError('Invalid organizer binary label')
+        return 'REVIEW' if row['binary_label'] else 'NORMAL'
+    description='\n'.join(row['annotations'])
+    if objective=='scene':return description
+    if objective!='timeline':raise ValueError('Unknown training objective')
+    if row['binary_label'] not in (0,1):raise ValueError('Invalid organizer binary label')
+    times=sorted(set(float(t) for t in row['anchors'])) if row['binary_label'] else []
+    if row['binary_label'] and not times:raise ValueError('Positive example has no organizer time anchor')
+    if any(not math.isfinite(t) or t<0 for t in times):raise ValueError('Invalid organizer time anchor')
+    return json.dumps({'scene':description,'review_times':times},ensure_ascii=False)
+
 
 def visual_content(frames, prompt, side=448):
     content = []

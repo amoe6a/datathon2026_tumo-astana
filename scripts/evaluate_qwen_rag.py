@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import signal
+import statistics
 import time
 
 os.environ.update(HF_HUB_OFFLINE='1',TRANSFORMERS_OFFLINE='1',HF_HUB_DISABLE_TELEMETRY='1')
@@ -24,7 +25,9 @@ def summarize(records):
         f1=2*tp/(2*tp+fp+fn) if 2*tp+fp+fn else 0,
         accuracy_including_failures=(tp+tn)/len(records) if records else 0,
         max_warm_seconds=max(times,default=0),
-        median_nearest_anchor_error_sec=sorted(errors)[len(errors)//2] if errors else None,
+        median_warm_seconds=statistics.median(times) if times else None,
+        median_nearest_anchor_error_sec=statistics.median(errors) if errors else None,
+        nearest_anchor_evaluated_videos=len(errors),
         timestamp_note='Nearest organizer anchor, only for detected positive videos; not a semantic event match.',
         actor_quality_note='Free-text human annotations supervise training; role/action accuracy has not been independently scored.')
 
