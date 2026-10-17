@@ -14,16 +14,23 @@ def reference_scores(frames, path, demo):
     if not Path(path).is_file():
         raise ValueError("No reference model. Train on labeled data, or run the synthetic demo setup.")
     with np.load(path, allow_pickle=False) as m:
+        if "weak_labels" in m and bool(m["weak_labels"].item()):
+            raise ValueError("Weak binary benchmark has no reviewed semantic rules; it cannot serve API verdicts")
         if bool(m["demo_only"].item()) != demo:
             raise ValueError("Synthetic models cannot be used in reference/competition mode")
         labels = m["labels"].tolist()
         x = (features(frames) - m["mean"]) / m["scale"]
         logits = x @ m["coef"].T + m["intercept"]
-        if logits.shape[1] == 1:
-            logits = np.concatenate([np.zeros_like(logits), logits], axis=1)
-        logits -= logits.max(axis=1, keepdims=True)
-        scores = np.exp(logits)
-        scores /= scores.sum(axis=1, keepdims=True)
+        if "multilabel" in m and bool(m["multilabel"].item()):
+            from scipy.special import expit
+            scores = expit(logits)
+        else:
+            # Existing single-label artifacts remain readable.
+            if logits.shape[1] == 1:
+                logits = np.concatenate([np.zeros_like(logits), logits], axis=1)
+            logits -= logits.max(axis=1, keepdims=True)
+            scores = np.exp(logits)
+            scores /= scores.sum(axis=1, keepdims=True)
         threshold = float(m["threshold"].item())
     return labels, scores, threshold
 
@@ -60,6 +67,9 @@ def analyze(path, model, engine, rule_path, progress=lambda p, s: None):
     if engine == "qwen":
         from ml.qwen import analyze_qwen
         events, warnings = analyze_qwen(frames, model, rules, progress)
+    elif engine == "bonsai":
+        from ml.bonsai import analyze_bonsai
+        events, warnings = analyze_bonsai(frames, model, rules, progress)
     else:
         labels, scores, threshold = reference_scores(frames, model, engine == "demo")
         events = temporal_events(frames, labels, scores, threshold, rules)
