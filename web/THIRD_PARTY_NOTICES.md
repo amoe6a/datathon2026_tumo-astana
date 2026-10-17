@@ -1,0 +1,62 @@
+# Frontend reference and attribution record
+
+The interface uses local HTML, CSS and JavaScript; it does not require React,
+Tailwind, a CDN, web fonts or a Node.js production server.
+
+## Brainwave visual reference
+
+Repository: https://github.com/adrianhajdin/brainwave
+Inspected revision: 73eaea5c1ce9543a0bb76858ec80e39d0201461f
+
+Inspected `src/components/Hero.jsx`, `src/components/design/Hero.jsx`,
+`src/components/Section.jsx`, `src/components/Benefits.jsx`,
+`src/assets/svg/SectionSvg.jsx`, `src/index.css`, and the asset tree.
+
+Reference ideas: centered oversized hero, concentric orbital geometry,
+gradient-framed central workspace, layered plinth, section rails and corner
+markers, numbered asymmetric feature cards. These are independently implemented
+in `index.html` and `style.css`. No Brainwave source or image assets are copied:
+no root license was found in the inspected tree and the GitHub license endpoint
+returned 404. Its robot, photographs, logos and font files are not included.
+
+## AI SaaS Landing adaptation
+
+Repository: https://github.com/HardikRathod123/ai-saas-landing-page-template
+Branch: master
+Inspected revision: 488341b21ec4eb4e9fbee2970e6017b19f22c949
+
+Inspected `LICENSE`, `src/sections/Hero.tsx`, `src/sections/Header.tsx`,
+`src/sections/Features.tsx`, `src/app/globals.css`, the asset tree,
+`src/assets/images/underline.svg`, and `src/assets/images/loader.svg`.
+
+The layered padding-box/conic-gradient border from `.border-gradient` in
+`src/app/globals.css` is adapted in `.workspace-shell` with project-specific
+colors. Hero.tsx's isolated radial background, concentric orbit arrangement and
+central framed content inform the independently built CSS layout. Header.tsx
+informs the compact wordmark/navigation arrangement. React state, Motion
+dependencies, stock robot image, logos, testimonial portraits and SVG assets
+are not transferred. No externally hosted resources are required.
+
+The following notice applies to the adapted MIT source:
+
+MIT License
+
+Copyright (c) 2024 Rathod Hardik
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
