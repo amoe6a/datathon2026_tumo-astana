@@ -75,10 +75,31 @@
       <div id="resultDemoNotice" class="notice" hidden>СИНТЕТИЧЕСКИЙ ПРИМЕР · Не является оценкой банковского видео.</div><div id="eventTimeline" class="event-timeline" aria-label="Переходы к событиям"></div><div id="eventList" class="event-list"></div><div id="warningList" class="warning-list" aria-label="Ограничения анализа"></div>
     </section>
     <section id="how-it-works" class="how-section section-pad" aria-labelledby="howTitle"><div class="section-heading"><div><p class="section-kicker">ОТ ЗАПИСИ К ПРОВЕРЯЕМОМУ ВЫВОДУ</p><h2 id="howTitle">Всё начинается с фактов.</h2></div><p class="muted">Три шага, чтобы разобраться<br>в моменте, который важен.</p></div><div class="steps-grid">
-      <article class="step-card"><div class="step-top"><span class="step-number">01</span><span aria-hidden="true">↗</span></div><h3>Загрузите запись</h3><p>Выберите MOV или MP4. Сервис принимает файл и запускает локальный анализ.</p><div class="card-foot">ВИДЕО <span aria-hidden="true">→</span></div></article>
-      <article class="step-card"><div class="step-top"><span class="step-number">02</span><span aria-hidden="true">↗</span></div><h3>Найдите момент</h3><p>Перейдите к таймкоду события. Сопоставьте описание с исходными кадрами.</p><div class="card-foot">ДОКАЗАТЕЛЬСТВО <span aria-hidden="true">→</span></div></article>
-      <article class="step-card"><div class="step-top"><span class="step-number">03</span><span aria-hidden="true">↗</span></div><h3>Проверьте основание</h3><p>Изучите правило, условия его применения и ограничения. Окончательную оценку даёт человек.</p><div class="card-foot">ЧЕЛОВЕК ПРИНИМАЕТ РЕШЕНИЕ <span aria-hidden="true">↗</span></div></article>
-    </div></section>
+      <article class="step-card step-recording">
+        <div class="step-visual">
+          <img src="/assets/images/steps/recording.webp" width="1100" height="826" alt="Камера видеонаблюдения на стене здания" loading="lazy" decoding="async">
+          <div class="step-top"><span class="step-number">01</span><span aria-hidden="true">↗</span></div>
+          <span class="step-visual-caption" aria-hidden="true">ЗАПИСЬ С КАМЕРЫ</span>
+        </div>
+        <div class="step-body"><h3>Загрузите запись</h3><p>Выберите MOV или MP4. Сервис принимает файл и запускает локальный анализ.</p><div class="card-foot">ВИДЕО <span aria-hidden="true">→</span></div></div>
+      </article>
+      <article class="step-card step-timeline">
+        <div class="step-visual">
+          <img src="/assets/images/steps/timeline.webp" width="1100" height="1650" alt="Экран с видеокадрами и временной шкалой записи" loading="lazy" decoding="async">
+          <div class="step-top"><span class="step-number">02</span><span aria-hidden="true">↗</span></div>
+          <span class="step-visual-caption" aria-hidden="true">ПОИСК ПО ТАЙМКОДУ</span>
+        </div>
+        <div class="step-body"><h3>Найдите момент</h3><p>Перейдите к таймкоду события. Сопоставьте описание с исходными кадрами.</p><div class="card-foot">ДОКАЗАТЕЛЬСТВО <span aria-hidden="true">→</span></div></div>
+      </article>
+      <article class="step-card step-documents">
+        <div class="step-visual">
+          <img src="/assets/images/steps/documents.webp" width="1100" height="734" alt="Работа с бумажным документом за столом" loading="lazy" decoding="async">
+          <div class="step-top"><span class="step-number">03</span><span aria-hidden="true">↗</span></div>
+          <span class="step-visual-caption" aria-hidden="true">ПРОВЕРКА ДОКУМЕНТА</span>
+        </div>
+        <div class="step-body"><h3>Проверьте основание</h3><p>Изучите правило, условия его применения и ограничения. Окончательную оценку даёт человек.</p><div class="card-foot">ЧЕЛОВЕК ПРИНИМАЕТ РЕШЕНИЕ <span aria-hidden="true">↗</span></div></div>
+      </article>
+    </div><p class="photo-credits">Фото: <a href="https://unsplash.com/photos/a-security-camera-mounted-to-the-side-of-a-building-1hUVnQ64-SQ" target="_blank" rel="noopener noreferrer">Kevin Kandlbinder</a>, <a href="https://unsplash.com/photos/black-flat-screen-computer-monitor-abdBDZT9LJk" target="_blank" rel="noopener noreferrer">Jakob Owens</a> и <a href="https://unsplash.com/photos/man-writing-on-paper-OQMZwNd3ThU" target="_blank" rel="noopener noreferrer">Scott Graham</a> / Unsplash</p></section>
     <section id="sources" class="sources-section section-pad" aria-labelledby="sourcesTitle"><div class="section-heading"><div><p class="section-kicker">ОСНОВАНИЕ ИМЕЕТ ЗНАЧЕНИЕ</p><h2 id="sourcesTitle">Источник рядом с выводом.</h2></div><span class="source-emblem" aria-hidden="true">§</span></div><p class="muted sources-intro">Каждое событие связано с правилом из каталога сервиса. Название документа, точный пункт и ограничения доступны в результате проверки.</p><div class="sources-toolbar"><p id="sourcesStatus" class="hint" role="status">Введите ключ доступа выше, чтобы посмотреть фактический каталог.</p><button id="loadRulesButton" class="quiet-button" type="button">Загрузить каталог <span aria-hidden="true">↗</span></button></div><div id="sourceList" class="source-list"></div></section>
     <footer><a class="brand footer-brand" href="#top">forte<span class="brand-light">review</span></a><p>AI помогает заметить.<br>Человек — разобраться.</p><span class="footer-note">Командный прототип / Datathon 2026</span></footer>
   </main>

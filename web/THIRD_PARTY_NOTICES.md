@@ -3,6 +3,29 @@
 The interface uses local HTML, CSS and JavaScript; it does not require React,
 Tailwind, a CDN, web fonts or a Node.js production server.
 
+## Illustrative photographs in the three-step section
+
+Downloaded on 17 October 2026 from Unsplash's free library. Each original
+photo page identifies the image as free to use under the standard
+[Unsplash License](https://unsplash.com/license). These are illustrative
+website assets, separate from all event footage, evidence and ML data.
+The images are not part of any training or evaluation dataset.
+
+| Local file | Photographer | Original source |
+|---|---|---|
+| `images/steps/recording.webp` | Kevin Kandlbinder | [Security camera](https://unsplash.com/photos/a-security-camera-mounted-to-the-side-of-a-building-1hUVnQ64-SQ) |
+| `images/steps/timeline.webp` | Jakob Owens | [Video-editing monitor](https://unsplash.com/photos/black-flat-screen-computer-monitor-abdBDZT9LJk) |
+| `images/steps/documents.webp` | Scott Graham | [Writing on paper](https://unsplash.com/photos/man-writing-on-paper-OQMZwNd3ThU) |
+
+The local WebP files use Unsplash's image-delivery width/quality options.
+Cropping and visual tint are applied by CSS; no runtime image host is used.
+Photographer/source credits also appear below the cards. The standard
+Unsplash License permits downloading, modifying and using free-library
+images, including commercial use, and excludes resale of unmodified images
+and replication of a competing image service. This notice does not imply
+endorsement of Forte Review by the photographers, Unsplash or any software
+visible in the photographs.
+
 ## Brainwave visual reference
 
 Repository: https://github.com/adrianhajdin/brainwave
