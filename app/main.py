@@ -47,7 +47,8 @@ class Jobs:
             progress=self.s.runtime/jid/"progress.json"
             try:
                 obj.update(json.loads(progress.read_text(encoding="utf-8")))
-            except (FileNotFoundError, json.JSONDecodeError):
+            except (FileNotFoundError, PermissionError, json.JSONDecodeError):
+                # Progress is optional; Windows can briefly lock it during replacement.
                 pass
         return obj
 

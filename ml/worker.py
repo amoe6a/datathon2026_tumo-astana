@@ -1,13 +1,23 @@
 import argparse
 import json
 import os
+import time
 from pathlib import Path
 
 def atomic_json(path, value):
     path = Path(path)
     temp = path.with_suffix(".tmp")
     temp.write_text(json.dumps(value, ensure_ascii=False), encoding="utf-8")
-    temp.replace(path)
+    for attempt in range(5):
+        try:
+            temp.replace(path)
+            return
+        except PermissionError:
+            # A Windows reader may briefly prevent an atomic replacement.
+            # Persistent errors still fail the worker; never lose a final result silently.
+            if attempt == 4:
+                raise
+            time.sleep(0.01 * 2**attempt)
 
 def main():
     p=argparse.ArgumentParser()
