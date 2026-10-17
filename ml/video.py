@@ -10,6 +10,8 @@ class Frame:
     bgr: np.ndarray
 
 def sample_video(path, fps=2.0, max_duration=180, width=640):
+    if not np.isfinite(fps) or fps <= 0:
+        raise ValueError("Sampling FPS must be positive")
     cap = cv2.VideoCapture(str(path))
     try:
         if not cap.isOpened():
@@ -24,13 +26,17 @@ def sample_video(path, fps=2.0, max_duration=180, width=640):
         if cap.get(cv2.CAP_PROP_FRAME_WIDTH) * cap.get(cv2.CAP_PROP_FRAME_HEIGHT) > 3840 * 2160:
             raise ValueError("Video resolution exceeds the 4K processing limit")
         frames, next_at, idx, previous_time = [], 0.0, 0, -1.0
+        last_frame = None
         while True:
             ok, frame = cap.read()
             if not ok:
                 break
             decoded = cap.get(cv2.CAP_PROP_POS_MSEC) / 1000.0
             t = decoded if np.isfinite(decoded) and decoded > previous_time else idx / source_fps
+            if t <= previous_time:
+                raise ValueError("Nonmonotonic video timestamps")
             previous_time = t
+            last_frame = frame
             if t > max_duration:
                 raise ValueError("Video exceeds duration limit")
             if t + 1e-6 >= next_at:
@@ -42,8 +48,14 @@ def sample_video(path, fps=2.0, max_duration=180, width=640):
             idx += 1
         if not frames:
             raise ValueError("Video contains no decodable frames")
-        if idx < count * .95:
+        if idx < int(count):
             raise ValueError("Video appears truncated; analysis was not completed")
+        # Preserve the final real frame even when it falls between sample ticks.
+        if round(previous_time, 3) > frames[-1].time:
+            h, w = last_frame.shape[:2]
+            if w > width:
+                last_frame = cv2.resize(last_frame, (width, round(h * width / w)))
+            frames.append(Frame(round(previous_time, 3), last_frame))
         return frames, max(duration, previous_time)
     finally:
         cap.release()
