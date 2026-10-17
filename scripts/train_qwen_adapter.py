@@ -29,6 +29,8 @@ def train(args):
         'manifest_sha256':hashlib.sha256(Path(args.manifest).read_bytes()).hexdigest(),
         'rank':8,'learning_rate':args.learning_rate,'gradient_accumulation':4,
         'vision_encoder_frozen':True,'steps':[],'checkpoints':[]}
+    report['source_sha256']={str(p.relative_to(Path(__file__).resolve().parents[1])):
+        hashlib.sha256(p.read_bytes()).hexdigest() for p in [Path(__file__).resolve(),Path(__file__).resolve().parents[1]/'ml/scene.py']}
     def save():
         report['elapsed_sec']=round(time.monotonic()-start,3)
         report['peak_cuda_allocated_bytes']=torch.cuda.max_memory_allocated()

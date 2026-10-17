@@ -1,5 +1,6 @@
 """Deterministic local retrieval over supplied rule cards; no hosted embeddings."""
 from collections import Counter
+import hashlib
 import json
 import math
 from pathlib import Path
@@ -41,6 +42,19 @@ class RuleRetriever:
                            *card['required_evidence'],*card['exceptions_and_negative_examples']])
             terms=Counter(tokens(text));self.documents.append(terms);self.df.update(terms.keys())
         self.average=sum(sum(d.values()) for d in self.documents)/len(self.documents)
+        self.translations=None
+
+    def prompt_card(self,card,language='ru'):
+        if language not in {'ru','en'}:raise ValueError('Unsupported rule prompt language')
+        if language=='ru' or card['decision_mode']!='conditional':return compact_card(card)
+        if self.translations is None:
+            values=json.loads((self.folder/'conditional.en.json').read_text(encoding='utf-8'))
+            digest=hashlib.sha256(json.dumps(self.cards,sort_keys=True,separators=(',',':'),ensure_ascii=True).encode()).hexdigest()
+            if values.pop('_source_sha256')!=digest:raise ValueError('Rule translation is out of date')
+            if set(values)!={c['rule_id'] for c in self.cards if c['decision_mode']=='conditional'}:
+                raise ValueError('Conditional rule translations are incomplete')
+            self.translations=values
+        return {'rule_id':card['rule_id'],'mode':card['decision_mode'],**self.translations[card['rule_id']]}
 
     def retrieve(self, query, k=5):
         words=set(re.findall(r'[a-z]+',query.lower()))

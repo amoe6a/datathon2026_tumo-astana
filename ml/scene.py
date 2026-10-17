@@ -31,6 +31,30 @@ def visual_content(frames, prompt, side=448):
     return content
 
 
+def model_inputs(processor,frames,prompt,side=448,input_mode='images',max_pixels=131072):
+    if input_mode=='images':
+        messages=[{'role':'user','content':visual_content(frames,prompt,side)}]
+        return processor.apply_chat_template(messages,tokenize=True,add_generation_prompt=True,
+            return_dict=True,return_tensors='pt')
+    if input_mode!='video':raise ValueError('Unsupported visual input mode')
+    from transformers.video_utils import VideoMetadata
+    images=[]
+    for frame in frames:
+        image=Image.fromarray(cv2.cvtColor(frame.bgr,cv2.COLOR_BGR2RGB));image.thumbnail((side,side))
+        images.append(np.asarray(image))
+    indices=[round(f.time*1000) for f in frames]
+    metadata=VideoMetadata(total_num_frames=max(indices)+1,fps=1000.,frames_indices=indices)
+    # Millisecond frame indices preserve decoder timestamps after nonuniform
+    # selection. Native temporal patches share visual tokens across frame pairs.
+    text_prompt=('The available source-frame timestamps in seconds are '+json.dumps([f.time for f in frames])+'. '
+                 'For events choose one of these timestamps nearest the visible action. '+prompt)
+    messages=[{'role':'user','content':[{'type':'video'},{'type':'text','text':text_prompt}]}]
+    text=processor.apply_chat_template(messages,tokenize=False,add_generation_prompt=True)
+    return processor(text=[text],videos=[np.stack(images)],video_metadata=[metadata],do_sample_frames=False,
+        size={'shortest_edge':65536,'longest_edge':len(images)*max_pixels},
+        cap_pixels_per_frame=True,return_tensors='pt')
+
+
 def select_frames(frames, count=12, anchors=()):
     if not frames:
         raise ValueError('No decoded frames')
@@ -52,7 +76,7 @@ def readable(frames):
     return usable >= min(2, len(frames))
 
 
-def load_base(model_path, quantized=True, training=False):
+def load_base(model_path, quantized=True, training=False,max_pixels=128*32*32):
     import torch
     from transformers import AutoProcessor, Qwen3VLForConditionalGeneration, BitsAndBytesConfig
     if not torch.cuda.is_available():
@@ -65,7 +89,7 @@ def load_base(model_path, quantized=True, training=False):
             bnb_4bit_quant_type='nf4', bnb_4bit_use_double_quant=True,
             bnb_4bit_compute_dtype=dtype, llm_int8_skip_modules=['visual', 'lm_head'])
     processor = AutoProcessor.from_pretrained(str(model_path), local_files_only=True,
-        trust_remote_code=False, min_pixels=64*32*32, max_pixels=128*32*32)
+        trust_remote_code=False, min_pixels=64*32*32, max_pixels=max_pixels)
     model = Qwen3VLForConditionalGeneration.from_pretrained(str(model_path), **kwargs)
     model.config.use_cache = not training
     return model, processor

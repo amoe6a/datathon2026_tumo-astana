@@ -37,6 +37,9 @@ def main(args):
     rows=[r for r in manifest['videos'] if r['split']==args.split]
     if args.limit:rows=rows[:args.limit]
     config=load_config(args.config)
+    source_hashes={str(p.relative_to(Path(__file__).resolve().parents[1])):hashlib.sha256(p.read_bytes()).hexdigest()
+        for p in [Path(__file__).resolve(),Path(__file__).resolve().parents[1]/'ml/qwen_rag.py',
+                  Path(__file__).resolve().parents[1]/'ml/scene.py',Path(__file__).resolve().parents[1]/'ml/rag.py']}
     if args.adapter:config['adapter']=str(Path(args.adapter).resolve())
     started=time.monotonic();session=RagSession(config);load_seconds=time.monotonic()-started
     records=[]
@@ -59,9 +62,12 @@ def main(args):
             # This message is diagnostic only and must not include generated descriptions.
             if isinstance(exc,(ValueError,TimeoutError)):record['error']=str(exc)[:180]
         finally:signal.alarm(0)
+        record['generation_diagnostics']=session.diagnostics
         record['seconds']=round(time.monotonic()-before,3);records.append(record)
         report={'split':args.split,'config':config,'model_load_seconds':round(load_seconds,3),
+            'peak_cuda_allocated_bytes':session.torch.cuda.max_memory_allocated(),
             'manifest_sha256':hashlib.sha256(Path(args.manifest).read_bytes()).hexdigest(),
+            'source_sha256':source_hashes,
             'summary':summarize(records),'records':records,'complete':len(records)==len(rows)}
         temp=out/'report.tmp';temp.write_text(json.dumps(report,indent=2));temp.replace(out/'report.json')
         print(json.dumps({'completed':len(records),'total':len(rows),'summary':report['summary']}),flush=True)

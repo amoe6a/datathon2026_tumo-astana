@@ -1,0 +1,93 @@
+{
+  "_source_sha256": "8c2b38ac9346717113c3c90ed83c731ebd8ce0c4cb1b40ed9e8d623ebd92114e",
+  "CASH-001": {
+    "title": "Cashier leaves the workstation before customer service ends",
+    "required_evidence": ["The beginning of service, an unfinished transaction, the cashier's departure and the customer remaining are continuously visible.", "The workstation zone has been defined in advance."],
+    "exceptions": ["Customer service has already finished.", "The cashier bends down, reaches for equipment or is temporarily occluded by an object."],
+    "do_not_infer": ["Do not classify every departure as a violation outside customer service."]
+  },
+  "CASH-002": {
+    "title": "Storage of personal belongings in the cash handling area",
+    "required_evidence": ["The boundary of the cash handling area is established.", "There is evidence that the item is personal and belongs to an employee, rather than a customer or cash collection service."],
+    "exceptions": ["Medicines, medical devices and communication devices without photo/video recording are permitted.", "A cash collection bag is not a personal bag."],
+    "do_not_infer": ["Do not identify ownership by a person's face.", "Do not classify every unknown object as a personal belonging."]
+  },
+  "CASH-003": {
+    "title": "Communication device with a camera in the cash handling area",
+    "required_evidence": ["The device and the area are visible.", "Photo/video capability is confirmed by a visible camera or reliable device model information; a rectangular object alone is insufficient."],
+    "exceptions": ["A communication device without photo/video recording capability.", "Bank equipment or a customer's digital document is not equivalent to an employee's personal phone."],
+    "do_not_infer": ["Using a phone alone does not establish filming, a data leak or data transmission."]
+  },
+  "CASH-004": {
+    "title": "Previously accepted cash remains outside designated storage devices",
+    "required_evidence": ["Continuous transaction history establishes which cash was previously accepted and which belongs to the current customer.", "The work surface and storage locations are visible."],
+    "exceptions": ["Cash on the desk belongs to the current customer.", "The stack's origin is unclear or the start of the transaction is outside the clip."],
+    "do_not_infer": ["Cash being on the desk is not by itself a violation.", "A closed door does not prove that its lock is locked."]
+  },
+  "CASH-005": {
+    "title": "Accepting or counting cash without the customer present",
+    "required_evidence": ["This is confirmed to be accepting cash from a customer, rather than internal counting.", "The entire area where the customer could be present is visible."],
+    "exceptions": ["The customer is outside the frame but may be nearby.", "Internal handling after cash acceptance has finished."],
+    "do_not_infer": ["Absence from the frame is not equivalent to absence from the room."]
+  },
+  "CASH-006": {
+    "title": "Accepting banknotes without observable note-by-note counting",
+    "required_evidence": ["The entire cycle and all possible counting devices are visible.", "For coins, assess counting individual coins."],
+    "exceptions": ["A counting machine or automated cash desk was used.", "Counting may have happened before the clip began."],
+    "do_not_infer": ["The absence of a separate UV detector does not establish absence of authenticity checking."]
+  },
+  "CASH-008": {
+    "title": "Paying out cash without counting it in the customer's presence",
+    "required_evidence": ["The entire preparation and handover cycle is visible.", "The packaging type and applicability of the exceptions in paragraph 32 are established."],
+    "exceptions": ["Undamaged full or incomplete bundles and individual banknote straps are paid out according to their marked amounts under paragraph 32.", "Incomplete or damaged straps require note-by-note counting; coin packaging must also be considered."],
+    "do_not_infer": ["Do not require note-by-note counting for every sealed bundle."]
+  },
+  "CASH-010": {
+    "title": "Internal counting, sorting or packaging without a supervising employee",
+    "required_evidence": ["This is internal handling, rather than customer cash acceptance or payout.", "The entire area where a supervisor could be present is visible.", "The second employee's role is confirmed by role annotation, without facial identification."],
+    "exceptions": ["Customer acceptance and payout are explicitly excluded by paragraph 42.", "The supervisor may be outside the frame."],
+    "do_not_infer": ["A second person in the frame is not necessarily a supervisor."]
+  },
+  "CASH-012": {
+    "title": "Mixing banknote categories during packaging",
+    "required_evidence": ["The cash category is confirmed by readable labeling or unambiguous visible damage.", "Combining the categories into one package is visible."],
+    "exceptions": ["Ordinary movement before sorting.", "Image quality does not permit the banknotes' condition to be determined."],
+    "do_not_infer": ["Do not determine wear or authenticity from an unreadable frame."]
+  },
+  "CASH-013": {
+    "title": "Completed banknote strap or bundle with a visible discrepancy",
+    "required_evidence": ["Denominations or required details can be read reliably, or the quantity can be tracked.", "The formation operation is complete."],
+    "exceptions": ["Incomplete and mixed bundles are regulated separately by paragraphs 49-50.", "Banknote quantities usually cannot be established with an overhead camera."],
+    "do_not_infer": ["Do not calculate quantity from a stack's thickness."]
+  },
+  "CASH-014": {
+    "title": "Visible defect in completed banknote packaging",
+    "required_evidence": ["The packaging method and defect are distinguishable.", "Packaging is complete, rather than at an intermediate stage."],
+    "exceptions": ["A heat-sealed polyethylene bag with the required details is a permitted packaging method."],
+    "do_not_infer": ["Do not require a string seal in addition to an alternative permitted packaging method."]
+  },
+  "CASH-015": {
+    "title": "Defective coin-bag packaging",
+    "required_evidence": ["A coin bag is recognized and its packaging is complete.", "The defect is distinguishable."],
+    "exceptions": ["A bag is simply open while it is being packed."],
+    "do_not_infer": ["Do not estimate coin quantity from bag volume."]
+  },
+  "CIT-002": {
+    "title": "Acceptance of defective packaging for transportation",
+    "required_evidence": ["This is acceptance for transportation under section 3.", "The defect is visible and acceptance is complete."],
+    "exceptions": ["Defective packaging was rejected and replaced before acceptance.", "Collecting proceeds and transportation between administrative units are different contexts."],
+    "do_not_infer": ["Do not apply paragraph 112 to every bag at a cash desk without checking the context."]
+  },
+  "CIT-003": {
+    "title": "Packaging for transportation without the sending customer present",
+    "required_evidence": ["This is the transportation procedure described in paragraphs 110-113.", "The entire process and the entire area where the customer could be present are visible."],
+    "exceptions": ["The customer may be outside the frame."],
+    "do_not_infer": ["Do not apply this to every internal packaging operation by a cashier."]
+  },
+  "CIT-004": {
+    "title": "Access to or observation of cash loading by third parties",
+    "required_evidence": ["The loading area and cash collection stage are established.", "The third party's role is confirmed without facial recognition."],
+    "exceptions": ["A security employee, cash collector or authorized employee is not equivalent to an outsider."],
+    "do_not_infer": ["Do not apply paragraph 21 to ordinary customer service at the cash desk."]
+  }
+}

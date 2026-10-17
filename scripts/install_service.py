@@ -49,7 +49,8 @@ def install(args):
         raise ValueError('Service key must be a random URL-safe token of at least 16 characters')
     env = {'FORTE_API_KEY': key, 'FORTE_RUNTIME': str(runtime),
            'FORTE_ENGINE': args.engine, 'FORTE_MODEL': str(ROOT/'models/demo.npz'),
-           'HF_HUB_OFFLINE': '1', 'TRANSFORMERS_OFFLINE': '1', 'HF_HUB_DISABLE_TELEMETRY': '1'}
+           'HF_HUB_OFFLINE': '1', 'TRANSFORMERS_OFFLINE': '1', 'HF_HUB_DISABLE_TELEMETRY': '1',
+           'FORTE_LOCAL_TEST': '0'}
     api = [str(python), '-m', 'uvicorn', 'app.main:create_app', '--factory',
            '--host', '127.0.0.1', '--port', str(args.port), '--workers', '1']
     units = {}

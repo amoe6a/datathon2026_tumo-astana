@@ -12,7 +12,8 @@ def verify(args):
     key=Path(args.key_file).read_text(encoding='utf-8').strip()
     report={'url':args.url,'upload_bytes':Path(args.video).stat().st_size,'checks':{}}
     headers={'X-API-Key':key}
-    with httpx.Client(base_url=args.url,timeout=60,trust_env=False,follow_redirects=False) as client:
+    print(json.dumps({'stage':'checking_authentication'}),flush=True)
+    with httpx.Client(base_url=args.url,timeout=httpx.Timeout(30,connect=10),trust_env=False,follow_redirects=False) as client:
         for path in ['/api/v1/jobs/'+'a'*32,'/api/v1/rules']:
             for auth in ({},{'X-API-Key':'invalid-jury-key'}):
                 response=client.get(path,headers=auth)
@@ -21,16 +22,21 @@ def verify(args):
             response=client.post('/api/v1/analyze',headers=auth,files={'file':('tiny.mov',b'invalid','video/quicktime')})
             assert response.status_code==401,response.status_code
         report['checks']['missing_and_wrong_keys_rejected']=True
+        print(json.dumps({'stage':'checking_readiness'}),flush=True)
         response=client.get('/ready');response.raise_for_status()
         assert response.json()['ready'] is True
         report['checks']['ready']=True
         started=time.monotonic()
+        print(json.dumps({'stage':'uploading','bytes':report['upload_bytes']}),flush=True)
         with open(args.video,'rb') as stream:
             response=client.post('/api/v1/analyze',headers=headers,
-                files={'file':(Path(args.video).name,stream,'video/quicktime')})
+                files={'file':(Path(args.video).name,stream,'video/quicktime')},
+                timeout=httpx.Timeout(240,connect=10,write=120,pool=10))
         assert response.status_code==202,response.status_code
+        report['upload_accept_seconds']=round(time.monotonic()-started,3)
         accepted=response.json();assert accepted['status']=='processing'
         jid=accepted['job_id'];report['job_id']=jid
+        print(json.dumps({'stage':'polling_job'}),flush=True)
         while time.monotonic()-started<300:
             response=client.get('/api/v1/jobs/'+jid,headers=headers);response.raise_for_status()
             result=response.json();assert result['status'] in ['processing','done','failed']
@@ -54,6 +60,8 @@ def verify(args):
                 report.update(status='done',verdict=result['verdict'],events=len(result['violations']),
                     evidence_frames=frames,seconds=round(time.monotonic()-started,3),
                     engine=result.get('meta',{}).get('engine'),response_schema_valid=True)
+                report['within_five_minutes']=report['seconds']<=300
+                if not report['within_five_minutes']:report['status']='deadline_exceeded'
                 break
             time.sleep(3)
         else:report.update(status='timeout',seconds=round(time.monotonic()-started,3))

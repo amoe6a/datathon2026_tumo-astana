@@ -4,8 +4,8 @@ import json
 import math
 from pathlib import Path
 import time
-from ml.scene import load_base, visual_content, select_frames, readable, SCENE_PROMPT, read_json
-from ml.rag import RuleRetriever, compact_card
+from ml.scene import load_base, model_inputs, select_frames, readable, SCENE_PROMPT, read_json
+from ml.rag import RuleRetriever
 
 
 def load_config(path):
@@ -21,7 +21,8 @@ class RagSession:
     def __init__(self,config):
         import torch
         self.torch=torch;self.config=config
-        self.model,self.processor=load_base(config['base_model'],config.get('quantized',True))
+        self.model,self.processor=load_base(config['base_model'],config.get('quantized',True),
+            max_pixels=int(config.get('max_pixels',128*32*32)))
         self.has_adapter=bool(config.get('adapter'))
         if self.has_adapter:
             from peft import PeftModel
@@ -30,29 +31,46 @@ class RagSession:
         self.model.eval();self.model.config.use_cache=True
         self.retriever=RuleRetriever(config['rag_folder'])
         self.tokenizer_data=None
+        self.diagnostics=[]
 
     def generate(self,frames,prompt,max_tokens=320,adapter=True,schema=None):
-        messages=[{'role':'user','content':visual_content(frames,prompt,side=448)}]
-        inputs=self.processor.apply_chat_template(messages,tokenize=True,add_generation_prompt=True,
-            return_dict=True,return_tensors='pt').to('cuda')
+        inputs=model_inputs(self.processor,frames,prompt,side=int(self.config.get('image_side',448)),
+            input_mode=self.config.get('input_mode','images'),
+            max_pixels=int(self.config.get('max_pixels',131072))).to('cuda')
         if inputs['input_ids'].shape[1]>8192:raise ValueError('Visual context exceeds configured token budget')
         context=self.model.disable_adapter() if self.has_adapter and not adapter else nullcontext()
         options={}
         if schema is not None:
-            from lmformatenforcer import JsonSchemaParser
+            from lmformatenforcer import JsonSchemaParser, CharacterLevelParserConfig
             from lmformatenforcer.integrations.transformers import (
                 build_transformers_prefix_allowed_tokens_fn,build_token_enforcer_tokenizer_data)
             if self.tokenizer_data is None:
                 self.tokenizer_data=build_token_enforcer_tokenizer_data(self.processor.tokenizer)
+            parser_config=CharacterLevelParserConfig()
+            # Rule prompts and human annotations are bilingual. The default ASCII
+            # alphabet can terminate a Cyrillic string prematurely in this parser.
+            parser_config.alphabet+=''.join(chr(i) for i in range(0x0400,0x0530))+'«»№–—…'
             options['prefix_allowed_tokens_fn']=build_transformers_prefix_allowed_tokens_fn(
-                self.tokenizer_data,JsonSchemaParser(schema))
+                self.tokenizer_data,JsonSchemaParser(schema,config=parser_config))
         with context,self.torch.inference_mode():
             ids=self.model.generate(**inputs,max_new_tokens=max_tokens,do_sample=False,use_cache=True,**options)
         result=ids[:,inputs['input_ids'].shape[1]:]
         text=self.processor.batch_decode(result,skip_special_tokens=True)[0]
+        diagnostic={'input_tokens':int(inputs['input_ids'].shape[1]),
+            'output_tokens':int(result.shape[1]),'token_limit':int(max_tokens),
+            'reached_token_limit':bool(result.shape[1]>=max_tokens),'structured':schema is not None}
+        if schema is not None:
+            try:read_json(text);diagnostic['valid_json']=True
+            except ValueError:
+                diagnostic['valid_json']=False
+                try:json.loads(text)
+                except json.JSONDecodeError as exc:
+                    diagnostic.update(json_error=exc.msg,json_error_position=exc.pos,output_characters=len(text))
+        self.diagnostics.append(diagnostic)
         return text
 
     def analyze(self,frames,progress=lambda p,s:None):
+        self.diagnostics=[]
         if not readable(frames):raise ValueError('Video has insufficient visible detail for analysis')
         window=float(self.config.get('window_sec',24));stride=float(self.config.get('stride_sec',20))
         if not 0<stride<=window:raise ValueError('Invalid temporal window settings')
@@ -85,9 +103,14 @@ class RagSession:
                     '"observation":"specific visible action","all_conditions_visible":true,'
                     '"exception_applies":false}. Use one of the supplied frame timestamps. Empty events is '
                     'normal. Set uncertain true when needed.'+
-                    '\nRule cards: '+json.dumps([compact_card(c) for c in cards],ensure_ascii=False))
-                schema=decision_schema(cards) if self.config.get('guided_json',False) else None
-                raw=self.generate(selected,prompt,int(self.config.get('decision_tokens',320)),adapter=False,schema=schema)
+                    '\nRule cards: '+json.dumps([self.retriever.prompt_card(c,self.config.get('rule_language','ru')) for c in cards],ensure_ascii=False))
+                if self.config.get('include_scene_context',False):
+                    prompt+=('\nPreliminary role/scene description, which may be mistaken. Use it to locate '
+                        'the cashier workspace and distinguish roles, then verify every action against '
+                        'the frames yourself. It is not proof of a violation: '+description)
+                schema=decision_schema(cards,[f.time for f in selected]) if self.config.get('guided_json',False) else None
+                decision_adapter=self.config.get('decision_adapter',False)
+                raw=self.generate(selected,prompt,int(self.config.get('decision_tokens',320)),adapter=decision_adapter,schema=schema)
                 try:
                     result=read_json(raw)
                     found,uncertain=validate_decisions(result,cards,[f.time for f in selected])
@@ -98,8 +121,10 @@ class RagSession:
                         'Top-level events MUST be an array. uncertain MUST be a JSON boolean, not text. '
                         'For no events return {"events":[],"uncertain":true}. Otherwise each event MUST '
                         'include all five fields shown above. Do not wrap the JSON in prose.')
-                    result=read_json(self.generate(selected,repair,int(self.config.get('decision_tokens',320)),adapter=False,schema=schema))
+                    result=read_json(self.generate(selected,repair,int(self.config.get('decision_tokens',320)),adapter=decision_adapter,schema=schema))
                     found,uncertain=validate_decisions(result,cards,[f.time for f in selected])
+                self.diagnostics.append({'raw_candidates':len(result['events']),'accepted':len(found),
+                    'uncertain':bool(uncertain)})
                 if uncertain:warnings.append(f'Human review: some conditions were not visible around {start:.1f}s')
                 for event in found:
                     if not any(e['rule_id']==event['rule_id'] and abs(e['timecode_sec']-event['timecode_sec'])<=4 for e in events):
@@ -109,13 +134,15 @@ class RagSession:
         return events,warnings
 
 
-def decision_schema(cards):
+def decision_schema(cards,timestamps=None):
     properties={
         'rule_id':{'type':'string','enum':[c['rule_id'] for c in cards]},
         'timecode_sec':{'type':'number'},
         'observation':{'type':'string','minLength':10,'maxLength':240},
         'all_conditions_visible':{'type':'boolean'},
         'exception_applies':{'type':'boolean'}}
+    if timestamps is not None:
+        properties['timecode_sec']['enum']=sorted(set(float(t) for t in timestamps))
     return {'type':'object','properties':{
         'events':{'type':'array','maxItems':4,'items':{'type':'object','properties':properties,
             'required':list(properties),'additionalProperties':False}},

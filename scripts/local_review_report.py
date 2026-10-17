@@ -13,6 +13,7 @@ def main(args):
     parts=['<!doctype html><meta charset="utf-8"><title>Private local Qwen review</title>',
         '<style>body{max-width:1100px;margin:40px auto;font:17px system-ui;background:#101016;color:#eee}section{border:1px solid #555;padding:24px;margin:20px 0}pre{white-space:pre-wrap}a{color:#aaf}h2{font-size:20px}</style>',
         '<h1>Private local validation review</h1><p>Contains event annotations and model descriptions. Keep this file on this laptop. Model descriptions can be wrong. Check visible actors/actions, timing, rule prerequisites and exceptions against the video.</p>']
+    parts.append('<p>Experiment: <strong>'+html.escape(folder.name)+'</strong>. Example numbers follow the frozen validation order.</p>')
     for i,record in enumerate(report['records']):
         row=rows[record['sha256']];private=folder/f'private-{i+1:02d}.json'
         prediction=json.loads(private.read_text()) if private.exists() else {'status':'No valid structured result'}

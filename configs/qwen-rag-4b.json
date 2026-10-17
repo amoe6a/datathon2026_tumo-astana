@@ -1,0 +1,16 @@
+{
+  "base_model": "models/qwen3-vl-4b",
+  "adapter": null,
+  "rag_folder": "rules/rag",
+  "quantized": true,
+  "window_sec": 24,
+  "stride_sec": 20,
+  "frames_per_window": 12,
+  "retrieval_k": 4,
+  "image_side": 640,
+  "max_pixels": 262144,
+  "observation_tokens": 300,
+  "decision_tokens": 512,
+  "guided_json": true,
+  "decision_adapter": true
+}
