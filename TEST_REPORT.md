@@ -27,6 +27,14 @@ PR #1, frontend revision `73adee8`, was reviewed and merged with the existing ba
 
 The frontend covers upload validation, API errors, Retry-After, bounded polling, recovery without duplicate upload, verdict validation and evidence dialogs. See `docs/frontend-handoff.md` for Amir's separate live-browser checks and remaining browser limitations. These checks use synthetic or controlled responses; real video detection quality and GPU performance remain unverified.
 
+## ML and animation integration — 17 October 2026
+
+Merged Ratmir's `codex/ml-local-evaluation` revision `562955c` into the shared application, retaining Amir's frontend. Increased the three orbital markers to 42/28/14 pixels and shortened their periods to 38/52/44 seconds; their orbit paths and pause/reduced-motion controls remain in place. The updated interface was inspected in the local browser.
+
+The first combined Windows run exposed a transient `PermissionError` while polling a progress file during atomic replacement (60 passed, 2 failed). The status endpoint now retains the persisted job state when optional progress is temporarily locked; worker writes retry transient replacement locks and still raise persistent failures. Three regression checks cover locked reads, recovery and persistent write failures.
+
+After the fix, **65 Python/API tests passed in 77.85 seconds**, with one existing Starlette/HTTPX deprecation warning; **11 frontend behavior tests** and the JavaScript syntax check also passed. The existing synthetic NPZ remains compatible, and a live two-event upload succeeded on the combined local API. The refreshed ZIP includes both teammates' source changes and the synthetic fixtures. Ratmir's real-data measurements are documented separately in `docs/ml-handoff.md`; they were not reproduced in this workspace.
+
 ## Not verified
 
 - Detection quality, label coverage or confusion counts on ForteBank event videos.

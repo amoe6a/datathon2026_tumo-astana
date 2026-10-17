@@ -39,25 +39,25 @@
   box-shadow: inset -5px -5px 12px #0d0c1280, 0 0 22px #b9a1ee35;
 }
 .planet-one {
-  --planet-size: 28px;
+  --planet-size: 42px;
   --orbit-radius: 539.5px;
   --start-angle: 176deg;
-  --orbit-period: 85s;
+  --orbit-period: 38s;
   background: linear-gradient(130deg, #dec2ff, #594075 70%);
 }
 .planet-two {
-  --planet-size: 17px;
+  --planet-size: 28px;
   --orbit-radius: 649.5px;
   --start-angle: -25deg;
-  --orbit-period: 120s;
+  --orbit-period: 52s;
   animation-direction: reverse;
   background: linear-gradient(130deg, #ffc0ad, #9e4864 70%);
 }
 .planet-three {
-  --planet-size: 8px;
+  --planet-size: 14px;
   --orbit-radius: 429.5px;
   --start-angle: -130deg;
-  --orbit-period: 100s;
+  --orbit-period: 44s;
   background: #f5a3b6;
   box-shadow: 0 0 16px #fa8e9b55;
 }

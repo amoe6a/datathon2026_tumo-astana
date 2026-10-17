@@ -13,8 +13,10 @@ A local video-review application for the ForteBank Datathon case. Upload a MOV f
 - [Download the complete team kit ZIP](https://github.com/amoe6a/datathon2026_tumo-astana/raw/refs/heads/main/team-kit/forte-review-team-kit.zip)
 - [Verification report and remaining checks](TEST_REPORT.md)
 - [Frontend handoff and browser checks](docs/frontend-handoff.md)
+- [Ratmir: ML handoff, measurements and remaining work](docs/ml-handoff.md)
+- [ML labeling guide](docs/ml-labeling.md)
 
-Clone this repository to work together, or download the ZIP for a standalone copy. The ZIP was refreshed on 17 October 2026 after integrating Amir's frontend (PR #1), and includes generated synthetic test clips; the repository contains their generator. Real event videos, runtime evidence and credentials are not included. Use Git to receive later team changes.
+Clone this repository to work together, or download the ZIP for a standalone copy. The ZIP was refreshed on 17 October 2026 after integrating Amir's frontend, Ratmir's ML tools and the larger, faster orbital animation. It includes generated synthetic test clips; the repository contains their generator. Real event videos, runtime evidence and credentials are not included. Use Git to receive later team changes.
 
 ![Forte Review interface](docs/frontend-preview/desktop.jpg)
 
@@ -48,6 +50,8 @@ For macOS/Linux: `python3.11 -m venv .venv`, `.venv/bin/python -m pip install -r
 ## Real baseline on CPU
 
 Copy `data.example.json` to `data/manifest.json`. Put videos in `data/videos/`. Human labelers add a category and time interval for each visible event; the organizer's binary label alone is not enough. Use only reviewed categories from `rules/catalog.json`. Explicitly label normal intervals. Unlabeled frames are ignored. Group related recordings before splitting; keep camera/actor/session duplicates together.
+
+Follow [the labeling guide](docs/ml-labeling.md) for the required `group_reviewed` and `events_reviewed` flags and complete event annotations. The manifest validator rejects unfinished review and leakage between splits. Ratmir's weak binary benchmark is an experimental comparator; its weights are rejected by the review API because they have no reviewed event types.
 
 ```powershell
 .venv\Scripts\python.exe -m ml.train data/manifest.json --output models/reference.npz --threshold 0.8
