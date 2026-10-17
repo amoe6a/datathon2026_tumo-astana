@@ -1,5 +1,8 @@
 # ML handoff — 17 октября 2026
 
+> Historical plan/handoff. The current Qwen release and operations supersede earlier deployment instructions: see judges-handoff.md and the repository README. Do not restart old model services or run training during judging.
+
+
 Ветка: `codex/ml-local-evaluation`. Работа выполнена в отдельной копии проекта. **Хорошего качества добиться не удалось; модель для соревнования пока не готова.** Backend, frontend, общий список зависимостей и каталог правил не изменялись.
 
 ## Качество на реальных данных

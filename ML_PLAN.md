@@ -1,5 +1,8 @@
 # ML-план на 12 часов: baseline, Qwen и проверка Bonsai
 
+> Historical plan/handoff. The current Qwen release and operations supersede earlier deployment instructions: see docs/judges-handoff.md and the repository README. Do not restart old model services or run training during judging.
+
+
 ## Статус выполнения — 17 октября 2026
 
 Рабочая копия `datathon2026_tumo-astana-ml`, ветка `codex/ml-local-evaluation`. **Готового решения с хорошим качеством пока нет.**

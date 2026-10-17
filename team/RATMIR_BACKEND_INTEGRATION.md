@@ -1,5 +1,8 @@
 # Ратмиру: подключение модели к готовому backend
 
+> Historical plan/handoff. The current Qwen release and operations supersede earlier deployment instructions: see ../docs/judges-handoff.md and the repository README. Do not restart old model services or run training during judging.
+
+
 Обновление 17 октября: backend, synthetic demo и native Bonsai уже работают как пользовательские systemd-службы в `/home/angel/forte-review-service`. Сначала прочитай [текущее развёртывание](../docs/linux-deployment.md) и проверь существующие службы. Инструкции ниже описывают начальную подготовку нового хоста. Сетевые проверки TCP/TLS на 7844 теперь прошли на обоих ноутбуках; публичный API пока не подтверждён из-за отказа автоматической проверки запуска туннеля. Качество модели остаётся недостаточным для соревнования.
 
 Этот файл можно целиком передать своему Codex в локальной копии проекта на RTX 4060. Это продолжение ML-задачи; backend уже обновлён. Модель пока не объявлена готовой.

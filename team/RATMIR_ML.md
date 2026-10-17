@@ -1,5 +1,8 @@
 # Ratmir's Codex prompt for detection and evaluation
 
+> Historical plan/handoff. The current Qwen release and operations supersede earlier deployment instructions: see ../docs/judges-handoff.md and the repository README. Do not restart old model services or run training during judging.
+
+
 Open the shared `forte-review` repository in Codex and paste the task below. You need the whole code folder/ZIP, not just this prompt. Keep the shared root `AGENTS.md`; use this file by explicit reference.
 
 ---

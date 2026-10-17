@@ -1,5 +1,11 @@
 # Verification report
 
+## Current Qwen release — 18 October 2026
+
+The current engine is Qwen3-VL-2B with the trained scene adapter and dense verification. Read [the release report](docs/release-results.md) and [machine-readable operational evidence](reports/qwen-release.json) for current deployment checks. The frozen release passed **115 Linux tests** (26.737 seconds, no failures/skips), the **12 frontend tests**, and an actual synthetic GPU pipeline with all socket connections blocked (zero attempted connections). Validation F1 is 0.667; the once-only held-out Qwen test is F1 0.444 (TP=2, TN=0, FP=3, FN=2), so model quality remains insufficient for automatic decisions.
+
+The sections below are **historical records**, including the retired Bonsai deployment. Their statements about active engines and unavailable public access do not describe the current release.
+
 Verified on 17 October 2026 in a Windows/Python 3.11 virtual environment. The authoring machine has an MX250 2 GB; it is not the team's RTX 4060 host. The event dataset was downloaded later in this session and used only for local processing with aggregate diagnostics.
 
 ## Linux deployment verification — 17 October 2026

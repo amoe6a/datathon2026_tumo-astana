@@ -2,7 +2,20 @@
 
 A local video-review application for the ForteBank Datathon case. Upload a MOV file, poll the authenticated API, then inspect possible events with source frames, timestamps and a curated rule reference.
 
-**Status:** the backend and synthetic demo are deployed as private Linux user services on the RTX laptop. The native Bonsai engine is running and has completed real positive/negative train uploads through the API. Detection quality remains insufficient: its seven-video validation had TP=1, TN=3, FP=1, FN=2, F1=0.400. Weak binary CPU weights remain rejected by the review API. Public jury access is not yet verified. See the Linux deployment handoff and ML quality report for measured results and remaining gates.
+**Current model:** locally fine-tuned Qwen3-VL with a curated, local RK rule retriever. Bonsai is retained only as an earlier comparator. The public judge address is **https://fracture-freestyle-unvalued.ngrok-free.dev**. See [judge access and operations](docs/judges-handoff.md) and [Linux deployment](docs/linux-deployment.md). Model quality and deployment checks are separate; see the release results and limitations below.
+
+## Final measured release
+
+Selected: **Qwen3-VL-2B-Instruct, four-epoch scene LoRA, BF16 inference and denser verification**, frozen in `configs/qwen-release.json`. Training used only 26 manually annotated training videos. A matched BF16 base-model control scored F1 0 on validation; the selected adapter scored 0.667.
+
+| Evaluation | TP / TN / FP / FN | F1 | Accuracy | Failures |
+|---|---:|---:|---:|---:|
+| Validation, 7 videos | 2 / 3 / 1 / 1 | 0.667 | 5/7 (71.4%) | 0 |
+| Held-out test, 7 videos, once after freeze | 2 / 0 / 3 / 2 | 0.444 | 2/7 (28.6%) | 0 |
+
+**Generalization remains weak.** Every negative test clip was falsely flagged, and two positives were missed. The working application supports human review; these results do not support automatic compliance decisions. The seven-video validation set was used repeatedly for model selection. Actor accuracy, event classification, new-angle robustness and semantic timestamp correctness are unverified. Empty findings do not prove compliance.
+
+See [complete results, methods and limitations](docs/release-results.md), [aggregate experiments](reports/qwen-experiments.json), [release/API evidence](reports/qwen-release.json), and the [short demonstration pitch](docs/pitch.md). Keep both the RTX laptop and its hotspot laptop awake and connected through **18 October 2026, 17:00 UTC+05**. Supply the URL and existing private key through the organizer's submission channel; no automatic submission has been made.
 
 ## Team resources
 
@@ -19,7 +32,7 @@ A local video-review application for the ForteBank Datathon case. Upload a MOV f
 - [Ratmir: ML handoff, measurements and remaining work](docs/ml-handoff.md)
 - [ML labeling guide](docs/ml-labeling.md)
 
-Clone this repository to work together, or download the ZIP for a standalone copy. The ZIP was refreshed on 17 October 2026 after frontend/ML integration, backend recovery fixes and the managed Linux deployment. It includes generated synthetic test clips; the repository contains their generator. Real event videos, runtime evidence and credentials are not included. Use Git to receive later team changes.
+Clone this repository to work together, or download the ZIP for a standalone copy. The source-only ZIP is rebuilt with `python -m scripts.build_team_kit`. Generate synthetic test clips locally with `python -m scripts.make_demo`. Real event videos, runtime evidence and credentials are not included. Use Git to receive later team changes.
 
 ![Forte Review interface](docs/frontend-preview/desktop.jpg)
 
@@ -65,25 +78,21 @@ $env:FORTE_MODEL = 'models/reference.npz'
 
 Restart the server after changing its mode/model. The baseline uses small appearance, edge and motion features with a linear classifier. It is fast and useful as a measured comparator, but vulnerable to new camera angles and background shortcuts. Its scores are not calibrated probabilities. Synthetic weights are deliberately rejected in real reference mode.
 
-## Local vision model on the RTX 4060 8 GB
+## Qwen release on the RTX 4060 8 GB
 
-The proposed candidate is **Qwen3-VL-2B-Instruct**, whose publisher lists Apache 2.0 licensing. Model weights are about 4.26 GB. Total memory depends on visual tokens, context and runtime overhead; 8 GB feasibility is an estimate to test, not a measured claim. Close other GPU workloads. Do not train or fine-tune a large model for the initial MVP.
+The measured Linux runtime is separate from the Windows synthetic-demo environment. It uses local publisher Safetensors weights and a private supervised LoRA adapter trained only on the 26 training videos. The frozen configuration is `configs/qwen-release.json`; training/evaluation details are in [the Qwen report](docs/qwen-training-deployment.md).
 
-On the RTX laptop, after core setup:
+On the configured RTX laptop:
 
-```powershell
-.venv\Scripts\python.exe -m pip install torch==2.8.0 torchvision==0.23.0 --index-url https://download.pytorch.org/whl/cu126
-.venv\Scripts\python.exe -m pip install -r requirements-gpu.txt
-.venv\Scripts\python.exe -m scripts.doctor
-.venv\Scripts\python.exe -m scripts.download_model
-$env:FORTE_ENGINE = 'qwen'
-$env:FORTE_MODEL = 'models/qwen3-vl-2b'
-.venv\Scripts\python.exe -m uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8000 --workers 1
+```bash
+cd /home/angel/forte-review-service
+systemctl --user start forte-jury.service forte-ngrok.service
+curl --fail http://127.0.0.1:8000/ready
 ```
 
-Use a current NVIDIA driver compatible with the chosen CUDA wheel; the system CUDA toolkit is not required just to use the wheel. The pinned GPU combination is a proposed reproducible setup, not locally verified here. Verify imports and one 10-second clip before downloading/processing the full set. The model download pins a publisher revision. Retain its license. Runtime uses `local_files_only=True` and offline environment flags; there is no cloud inference endpoint.
+Fresh-machine setup uses the exact Linux runtime lock, pinned publisher model revision, and selected adapter. See [deployment and rollback](docs/linux-deployment.md). Weights, video data, keys and private adapters are intentionally absent from Git and the team ZIP. A successful import is not an inference benchmark; verify a real MOV and the complete public upload path.
 
-The adapter covers the entire clip using overlapping 8-second windows, up to approximately nine 1-FPS images per window. It returns constrained event JSON; source IDs come only from the catalog. A malformed model response fails the job rather than becoming a clean verdict. Each API job starts a child process and reloads the model, so measure **cold end-to-end latency**, not just generation time. If this misses 240 seconds for a 145-second clip, reduce visual tokens/windows only after checking recall, or submit the validated reference baseline. GPU worker reuse is a later optimization.
+All inference stays local. Qwen observes actors/actions, a deterministic bilingual retriever selects source-backed rule cards, and a visual check applies their prerequisites and exceptions. Accepted events get actual source JPEGs and timestamps. Constrained JSON does not guarantee correct visual reasoning; known misses, false alarms and localization limitations must be reported honestly.
 
 ## Jury API
 
@@ -103,13 +112,13 @@ Limits: 64 MB upload, 180 seconds, at most 4K resolution, 270-second worker time
 
 ## Deployment and offline operation
 
-Serve UI and API from the same machine. The team owner confirmed that organizers allow Cloudflare Tunnel. `cloudflared tunnel --url http://127.0.0.1:8000` prints a temporary HTTPS URL; use `--protocol http2` if UDP/QUIC cannot connect. A named tunnel is preferable for a stable address. A tunnel transports uploaded data; it is not an AI service. Keep the synthetic demo on its own port/runtime/key. See [backend handoff](docs/backend-handoff.md) for startup and actual verification status.
+UI and API run on the same RTX laptop. Cloudflare did not connect on this network; the configured `forte-ngrok.service` provides the existing public HTTPS address. A tunnel transports uploads to local inference. Keep the synthetic demo on its own port/runtime/key. See [current deployment](docs/linux-deployment.md) and [judge handoff](docs/judges-handoff.md).
 
-Keep the laptop plugged in, disable sleep through the normal settings, use a stable network, and test from another connection. Do not add a login screen ahead of the jury API. Provide the URL and key privately. Quick tunnels have no availability guarantee and the URL changes when recreated. Test the public endpoint at least twice before the deadline.
+Keep both laptops plugged in, awake and connected through the judging window. Do not add a login screen ahead of the jury API. Give the judges the URL and key privately. The configured ngrok address has survived a tunnel restart; provider quota, power and hotspot continuity remain external dependencies. An independent physical-network test remains distinct from an HTTPS test through the public tunnel.
 
 CPU container option: build with `docker build -t forte-review .`; run with the key in an environment variable, bind port 8000, and mount your trained model read-only at `/models` and writable runtime at `/runtime`. This Dockerfile is for the CPU reference engine; GPU deployment uses the RTX setup above or a separately tested CUDA image.
 
-For the offline test, download dependencies and weights first, disconnect internet, and use the local UI/API. Rule links will not open offline, but their titles, sections, summaries and evidence remain available. Disable the external connection only on the test machine, then reconnect before jury access. Never rely on network APIs in the detector.
+`python -m scripts.check_qwen_offline --config configs/qwen-release.json --output runtime/offline-check.json` blocks socket connections in the inference process and checks synthetic local inference after setup. Do not disconnect the judge host during active judging. Rule links need connectivity to open, but their titles, sections, summaries and evidence remain available locally.
 
 ## Tests and data handling
 
@@ -124,8 +133,8 @@ Raw uploads are deleted after each job; temporary file locks trigger retries eve
 
 ## Known limitations
 
-- Semantic event detection remains unvalidated. The weak binary CPU experiment is documented separately and cannot establish event types or source applicability. The enabled starting categories remain hypotheses about dataset relevance.
-- Two enabled event types are not an exhaustive taxonomy. New types can be missed. Extend the catalog only after checking visible evidence and a public RK rule.
+- The measured binary verdict results do not independently validate actor roles, event types, rule applicability or localization. Human review remains necessary.
+- The RAG catalog contains 29 cards: 15 conditional and 14 review-only. Catalog coverage does not mean every listed event type has demonstrated recognition accuracy. Review-only cards cannot independently create a violation.
 - Sparse frames can miss brief actions. Absence-based rules are disabled until full action visibility and temporal coverage are demonstrated.
 - A VLM can still misdescribe a frame. Schema validation prevents invented rule IDs, not visual hallucination. Human review remains necessary.
 - The reference baseline cannot prove semantic actions and is sensitive to camera/background changes. Its explanation says it matched a pattern rather than inventing an action.

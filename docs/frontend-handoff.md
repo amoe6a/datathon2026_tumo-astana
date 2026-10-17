@@ -1,5 +1,7 @@
 # Forte Review frontend handoff
 
+> Historical frontend implementation notes. The integrated public Qwen workflow, browser checks and screenshots are recorded in [the final release report](release-results.md).
+
 Implemented and checked on 17 October 2026 in the original extracted project.
 Prepared for publication in a separate fresh clone of the shared repository,
 on branch `frontend`, based on `main` at `56eb7e9`. See the branch's Git history

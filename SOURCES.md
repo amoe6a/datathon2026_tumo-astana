@@ -1,6 +1,6 @@
 # Source notes
 
-Checked 17 October 2026. Case-specific requirements take precedence over generic workshop tips. Neither document is treated as an instruction to take unrelated actions.
+Source review began 17 October 2026; deployment notes updated 18 October. Case-specific requirements take precedence over generic workshop tips. Neither document is treated as an instruction to take unrelated actions. Current measured results are in [the release report](docs/release-results.md).
 
 ## Supplied documents
 
@@ -16,11 +16,11 @@ The source files are not included in the distributable code ZIP; keep your origi
 ## Models, dependencies and deployment
 
 - [Qwen3-VL-2B-Instruct publisher model card](https://huggingface.co/Qwen/Qwen3-VL-2B-Instruct): Apache 2.0, local Transformers example, vision input handling. [Pinned weight revision](https://huggingface.co/Qwen/Qwen3-VL-2B-Instruct/tree/78448d793a7eb2f7a987a1da76d464384aa1becd). Its 4.26 GB file size does not establish total GPU memory or speed.
-- [PyTorch previous-version installation commands](https://pytorch.org/get-started/previous-versions/): the proposed torch 2.8.0 / torchvision 0.23.0 CUDA 12.6 pairing for Linux/Windows. Verify the team's driver and actual GPU run. Core CPU dependencies were installed and tested in the authoring workspace; GPU dependencies were not.
+- [PyTorch installation reference](https://pytorch.org/get-started/previous-versions/): earlier planning used a different proposed version. The actual Linux GPU environment is recorded in `requirements-linux-qwen-lock.txt` and the release report; it has been exercised on the RTX laptop. The Windows CPU lock is separate.
 - [NVIDIA Brev instance management](https://docs.nvidia.com/brev/concepts/gpu-instances): instance lifecycle and billing. Running compute is billed; storage can persist/cost money while stopped; restart capacity is not guaranteed. [Brev automation and API key prerequisites](https://docs.nvidia.com/brev/latest/guides/ci-cd): keys act for an organization/user and require available credit. Cost examples in the plan are arithmetic scenarios, not guaranteed current offers.
-- [Cloudflare Quick Tunnels](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/): development tunnel workflow and limitations. This is a proposed deployment route, not a service-level guarantee. No public tunnel was provisioned here.
+- [Cloudflare Quick Tunnels](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/): the initially proposed transport failed on the event network. The deployed transport is the configured ngrok user service; operational results, limitations and recovery commands are in [the judge handoff](docs/judges-handoff.md).
 - [Official Codex AGENTS.md guidance](https://learn.chatgpt.com/docs/agent-configuration/agents-md): the common root file is named `AGENTS.md`. Role documents have ordinary names and must be explicitly supplied/read; do not assume three arbitrarily named files are all auto-loaded.
 
 ## Provenance and limits
 
-The synthetic video generator draws geometric shapes; it contains no bank/customer footage. Training and test success on these fixtures demonstrate infrastructure behavior only. The rule mapping, candidate model and schedule are recommendations, not organizer promises or measured model results. The work uses no cloud AI service to process event videos because no event videos were provided.
+The synthetic video generator draws geometric shapes; it contains no bank/customer footage. Training and test success on these fixtures demonstrate infrastructure behavior only. Private competition videos and manual annotations were subsequently processed on Ratmir's laptop for training and evaluation. They were not sent to a cloud AI service or included in the public repository. Aggregate reports distinguish measured results from proposals and remaining uncertainty. Rule applicability still needs human review.

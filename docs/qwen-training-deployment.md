@@ -13,7 +13,7 @@ The current workbook has 42 video rows and 40 unique video hashes. The earlier f
 ## Inference
 
 1. Decode the uploaded MOV locally, without audio, at two sampled frames per second. Uniformly blank inputs fail.
-2. Qwen describes visible roles, objects and actions in overlapping temporal windows. Roles are activity labels, not identities.
+2. Qwen describes visible roles, objects and actions. The selected release uses whole-clip context; overlapping short windows were tested and rejected for excess false positives. Roles are activity labels, not identities.
 3. A local BM25 retriever with English/Russian vocabulary expansion selects relevant cards from the 29-rule catalog. This needs no embedding service or internet connection.
 4. Qwen compares actual frames against each candidate's required evidence, exceptions and forbidden inferences. Constrained generation restricts JSON structure and rule IDs; it does **not** guarantee correct visual reasoning.
 5. Code rejects ungrounded timestamps, unsupported rule IDs, missing conditions and applicable exceptions. `review_only` cards never produce automatic violations. Accepted findings receive actual decoder frames and fixed official source references.
@@ -22,7 +22,7 @@ The trained adapter can be enabled for observations and, in separately evaluated
 
 ## Local commands
 
-The dedicated deployment is `/home/angel/forte-review-service`. Its `.venv-training` is isolated from the original teammate environment and inherits that environment's installed CUDA packages through a `.pth` file. The measured runtime is Python 3.14.8, Torch 2.14.0/CUDA 13, Transformers 5.17.0, PEFT 0.21.2 and bitsandbytes 0.50.2. The original CPU application environment remains Python 3.11. This is separate from the older proposed Windows GPU pins in the README.
+The dedicated deployment is `/home/angel/forte-review-service`. Training uses `.venv-training`, which inherits the original CUDA packages through a `.pth` file. The final `.venv-release` contains its own copied packages and does not depend on that original ML folder. The measured runtime is Python 3.14.8, Torch 2.14.0/CUDA 13, Transformers 5.17.0, PEFT 0.21.2 and bitsandbytes 0.50.2. The original CPU application environment remains Python 3.11. This is separate from the older proposed Windows GPU pins in the README.
 
 The additional dependencies are pinned in `requirements-qwen-training.txt`. The pinned LM Format Enforcer revision includes a Transformers 5 tokenizer-import fix; its older PyPI build has the same version number, so an existing installation may require `--force-reinstall --no-deps` for that exact revision. Download dependencies and publisher weights before offline execution.
 
@@ -47,7 +47,7 @@ The evaluation report distinguishes processed failures from clean verdicts. Bina
 
 ## Judge API and operation
 
-Candidate comparisons are still in progress. The trained 2B adapter with BF16 image input completed all seven validation clips: TP=2, TN=3, FP=1, FN=1 (binary F1 0.667), with a 5,334,147,584-byte peak CUDA allocation and at most 18.399 seconds per warm clip. Event timing was poor; binary agreement is not evidence of correct event type or localization. Multiple configurations have been compared on this small validation set, so selection optimism is substantial. The Qwen final test split has not yet been run.
+The original measured baseline is retained below for comparison. The final selected configuration and held-out result are recorded in the release report linked from the README. The trained 2B adapter with BF16 image input completed all seven validation clips: TP=2, TN=3, FP=1, FN=1 (binary F1 0.667), with a 5,334,147,584-byte peak CUDA allocation and at most 18.399 seconds per warm clip. Event timing was poor; the corrected conventional median nearest-anchor error is 31.5 seconds on only two detected positive videos. Earlier reports used the upper middle element (57 seconds) for an even sample count; the aggregate release export corrects that calculation while preserving original reports. Binary agreement is not evidence of correct event type or localization. Multiple configurations have been compared on this small validation set, so selection optimism is substantial. The frozen refined release has now been evaluated once on the seven held-out videos: TP=2, TN=0, FP=3, FN=2, failures=0; F1=0.444 and accuracy=2/7. No tuning used those test results. See [the complete release report](release-results.md).
 
 The constrained decoder requires an explicit Cyrillic alphabet. Without it, Russian observations could terminate inside a string despite staying below the generation limit. Both base and adapter synthetic Russian responses now pass; `scripts.check_qwen_offline` includes this regression check. Invalid output still fails rather than becoming a clean verdict.
 

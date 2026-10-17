@@ -1,5 +1,8 @@
 # Amir's Codex prompt for frontend and presentation
 
+> Historical plan/handoff. The current Qwen release and operations supersede earlier deployment instructions: see ../docs/judges-handoff.md and the repository README. Do not restart old model services or run training during judging.
+
+
 Open the shared `forte-review` folder in Codex and paste the task below. Obtain the entire code ZIP/repository as well as this file. Leave the common root `AGENTS.md` in place; explicitly reference this role prompt.
 
 ---

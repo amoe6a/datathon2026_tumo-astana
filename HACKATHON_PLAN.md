@@ -1,5 +1,8 @@
 # ForteBank Datathon execution plan
 
+> Historical plan/handoff. The current Qwen release and operations supersede earlier deployment instructions: see docs/judges-handoff.md and the repository README. Do not restart old model services or run training during judging.
+
+
 Build one complete workflow: **upload video → local detection → possible event → exact source frames → reviewed RK rule**. Make it reachable through the jury API early. Improve detection, reliability and explanations only after this works. The first demo is the included synthetic application; the competition MVP additionally requires real-data validation and a public URL.
 
 This plan assumes three equal contributors with 12 productive hours each, plus an optional four-hour extension. Your strengths determine ownership, not workload size: you own backend/deployment, Ratmir owns ML, Amir owns frontend/evidence presentation. All three inspect and label data. The RTX 4060 8 GB, 32 GB RAM, i9 laptop is the primary inference host. Brev is optional reserve compute.

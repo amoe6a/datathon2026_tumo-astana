@@ -1,5 +1,8 @@
 # Backend handoff — 17 октября 2026
 
+> Historical plan/handoff. The current Qwen release and operations supersede earlier deployment instructions: see judges-handoff.md and the repository README. Do not restart old model services or run training during judging.
+
+
 Обновление: backend и native Bonsai запущены отдельными пользовательскими systemd-службами на ноутбуке Ратмира; реальные positive/negative train-загрузки прошли через API. Текущие команды и ограничения: [Linux deployment](linux-deployment.md). Ниже сохранена история Windows-проверок до этого развёртывания. Публичный доступ пока не подтверждён, качество модели недостаточно для соревнования.
 
 Исходная интеграционная ревизия: `158b541`. Точный коммит этого обновления — последний коммит с этим документом в Git. Проверяемая среда: Windows, Python 3.11.0, core requirements; ноутбук с MX250 2 ГБ. RTX 4060 находится у Ратмира, настоящая модель ещё не готова.

@@ -1,0 +1,290 @@
+{
+  "recorded_at_utc": "2026-10-17T23:33:38.227610+00:00",
+  "freeze": {
+    "source_revision": "51a54a052a2ea43b455f5ef93e7a5e4ade8e6ef7",
+    "selected_validation_run": "val-2b-refined",
+    "frozen_at_utc": "2026-10-17T23:24:09.977469+00:00",
+    "config": {
+      "base_model": "models/qwen3-vl-2b",
+      "adapter": "models/forte-qwen-release",
+      "rag_folder": "rules/rag",
+      "quantized": false,
+      "window_sec": 180,
+      "stride_sec": 180,
+      "frames_per_window": 32,
+      "retrieval_k": 4,
+      "image_side": 448,
+      "max_pixels": 131072,
+      "observation_tokens": 300,
+      "decision_tokens": 1024,
+      "guided_json": true,
+      "decision_adapter": true,
+      "include_scene_context": true,
+      "rule_language": "ru",
+      "refine_events": true,
+      "refine_frames": 48
+    },
+    "config_sha256": "252184927c31d2b58f8f5f0b02eb6ded45ec8da489bb4c6e9a30ddaac56498c9",
+    "adapter_sha256": "50bd5d6a0541958c67b3106aecc0deb8d20f7517906e3b207926bce46938b03f",
+    "manifest_sha256": "8b978786b7ddc15d47a3bf1fb5051c0d48d7c9bae78e1fcaf1a11eeec24f1d1f",
+    "source_sha256": {
+      "app/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "app/config.py": "3184bd148d685ce54db72791c5c3a170ac928f714e98121be76795c9c164708f",
+      "app/lifecycle.py": "d4d26ac687332035152573d1b4e71d8480b96f7e96bdeec398282e087862b592",
+      "app/limits.py": "65aaa47b210b3dbd20d76915106d9832ae595d25edd0d77dd37267e6a4b03097",
+      "app/main.py": "94a7628fa0f49567191df50cf7dbbf44caceea6b9063b7a13100f1cd02e8c267",
+      "app/processes.py": "683ef260d8373c60a4ba509543d17331463647fa38bd649119c33970ba974871",
+      "app/readiness.py": "80f9487d057fe833b4b9fb6ca24b109574e3e7d727e7e5d5127e958d3dd2de69",
+      "app/worker_host.py": "593c7cdb180deb13baa18e88c6c9e17845954097bbf9e07ebf04e1d7c642b5c4",
+      "ml/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "ml/bonsai.py": "13902974e65232be95555e4e7ceeaf1ba5deb5ad552126f90aa5f80d0588621a",
+      "ml/engine.py": "267af07866dde11abbbdd14cafbde034cea19913675fabffda6e0af5670aa619",
+      "ml/manifest.py": "7a8465371c61ace9c1df332bb34512febc9f023a26a0a87008e55195ecb7bae1",
+      "ml/qwen.py": "e52b4d096225b1c915ca0d03f3ca206bf31c80bd4ceca31649d15d049704744f",
+      "ml/qwen_rag.py": "6acf2f434da37024a95d575a2f038102e01f7a3d44f3623050a3712bf4ad66e3",
+      "ml/rag.py": "b3de963aa1de8a6fcdac026e49d90632dc3bba4a8cb059c08b3ccc3407105533",
+      "ml/scene.py": "adaea850137e8b6bd2723fd336e001b144bf92e41901ce311fd3922a3a9590a5",
+      "ml/train.py": "a2d7d8a0de84508b41293b75951524440d6182420edd48b83610987df7d99d3d",
+      "ml/video.py": "6451cdafe2e72eae72b4c51349620b4a62e83f5222a4b6fb9d9f1c972ca956d3",
+      "ml/worker.py": "65a820003a85110f5c3cffbc90ad9a847137285c65fe6613568d47e89ed20846"
+    },
+    "rules_sha256": {
+      "build_info.json": "5323d20cde90754d3193d04088cc833e543d79a2bcccac19d175d30f51dfb97b",
+      "conditional.en.json": "448415b93768adb9274e9c53fb4fda3e7bebd49e622db7449e19768b976945f4",
+      "rules.json": "1fbc53ffa35b460516a7b1b096ce08db4e49d47605845d828fb9d42aa48b3549",
+      "scope_and_exclusions.json": "60c2b579e624a78c4a8e0fe061edff79c8093ad2e2f2c57831e81b3867264e15",
+      "sources.json": "2eeaa5efdf6c9280741112234c0782fec86d6834b423e4785922798ffff0b7ec"
+    },
+    "selection_used_test": false
+  },
+  "model": {
+    "publisher": "Qwen/Qwen3-VL-2B-Instruct",
+    "revision": "78448d793a7eb2f7a987a1da76d464384aa1becd",
+    "weights_sha256": "7de1838c87a5349b016c26a1c3f7d2bc400a3d485f95ef39a7059ffd734977a0",
+    "weights_bytes": 4255140312
+  },
+  "validation": {
+    "complete": true,
+    "summary": {
+      "TP": 2,
+      "TN": 3,
+      "FP": 1,
+      "FN": 1,
+      "attempted": 7,
+      "processed": 7,
+      "failed": 0,
+      "precision": 0.6666666666666666,
+      "recall": 0.6666666666666666,
+      "f1": 0.6666666666666666,
+      "accuracy_including_failures": 0.7142857142857143,
+      "max_warm_seconds": 33.62,
+      "median_warm_seconds": 11.275,
+      "median_nearest_anchor_error_sec": 26.25,
+      "nearest_anchor_evaluated_videos": 2,
+      "timestamp_note": "Nearest organizer anchor, only for detected positive videos; not a semantic event match.",
+      "actor_quality_note": "Free-text human annotations supervise training; role/action accuracy has not been independently scored."
+    },
+    "model_load_seconds": 3.946,
+    "peak_cuda_allocated_bytes": 5620063232
+  },
+  "test": {
+    "complete": true,
+    "summary": {
+      "TP": 2,
+      "TN": 0,
+      "FP": 3,
+      "FN": 2,
+      "attempted": 7,
+      "processed": 7,
+      "failed": 0,
+      "precision": 0.4,
+      "recall": 0.5,
+      "f1": 0.4444444444444444,
+      "accuracy_including_failures": 0.2857142857142857,
+      "max_warm_seconds": 42.24,
+      "median_warm_seconds": 24.301,
+      "median_nearest_anchor_error_sec": 16.5,
+      "nearest_anchor_evaluated_videos": 2,
+      "timestamp_note": "Nearest organizer anchor, only for detected positive videos; not a semantic event match.",
+      "actor_quality_note": "Free-text human annotations supervise training; role/action accuracy has not been independently scored."
+    },
+    "model_load_seconds": 3.928,
+    "peak_cuda_allocated_bytes": 5643474432
+  },
+  "offline": {
+    "passed": true,
+    "network_connect_attempts": 0,
+    "synthetic_only": true,
+    "cyrillic_event_schema_passed": true,
+    "full_synthetic_pipeline_passed": true,
+    "seconds": 40.584,
+    "scope": "Model load, tokenizer, constrained GPU generation and complete synthetic analysis pipeline"
+  },
+  "validation_parity": {
+    "passed": true,
+    "videos": 7,
+    "scope": "Per-video verdict parity in independent release environment"
+  },
+  "linux_tests": [
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "115",
+      "time": "26.737",
+      "timestamp": "2026-10-18T04:24:18.236101+05:00",
+      "hostname": "cachyos"
+    }
+  ],
+  "api_checks": [
+    {
+      "case": "short-positive",
+      "duration_sec": 14.7,
+      "returncode": 0,
+      "correctness_not_established": true,
+      "contract": {
+        "url": "http://127.0.0.1:8000",
+        "upload_bytes": 3044364,
+        "checks": {
+          "missing_and_wrong_keys_rejected": true,
+          "ready": true
+        },
+        "upload_accept_seconds": 0.028,
+        "status": "done",
+        "verdict": "violation",
+        "events": 1,
+        "evidence_frames": 3,
+        "seconds": 24.057,
+        "engine": "qwen_rag",
+        "response_schema_valid": true,
+        "jpeg_pixels_decoded": true,
+        "within_five_minutes": true
+      }
+    },
+    {
+      "case": "short-negative",
+      "duration_sec": 15.867,
+      "returncode": 0,
+      "correctness_not_established": true,
+      "contract": {
+        "url": "http://127.0.0.1:8000",
+        "upload_bytes": 3247107,
+        "checks": {
+          "missing_and_wrong_keys_rejected": true,
+          "ready": true
+        },
+        "upload_accept_seconds": 0.025,
+        "status": "done",
+        "verdict": "no_violation",
+        "events": 0,
+        "evidence_frames": 0,
+        "seconds": 21.043,
+        "engine": "qwen_rag",
+        "response_schema_valid": true,
+        "jpeg_pixels_decoded": true,
+        "within_five_minutes": true
+      }
+    },
+    {
+      "case": "longest-public",
+      "duration_sec": 142.533,
+      "returncode": 0,
+      "correctness_not_established": true,
+      "contract": {
+        "url": "https://fracture-freestyle-unvalued.ngrok-free.dev",
+        "upload_bytes": 28718927,
+        "checks": {
+          "missing_and_wrong_keys_rejected": true,
+          "ready": true
+        },
+        "upload_accept_seconds": 36.386,
+        "status": "done",
+        "verdict": "violation",
+        "events": 2,
+        "evidence_frames": 5,
+        "seconds": 101.8,
+        "engine": "qwen_rag",
+        "response_schema_valid": true,
+        "jpeg_pixels_decoded": true,
+        "within_five_minutes": true
+      }
+    }
+  ],
+  "restart_checks": {
+    "api_ready_after_restart": true,
+    "key_preserved": true,
+    "completed_jobs_persisted": true,
+    "same_public_url_after_restart": true,
+    "local_test_disabled": true,
+    "bonsai_disabled": true,
+    "awake_active": true
+  },
+  "services": {
+    "forte-jury.service": {
+      "state": "active",
+      "autostart": "enabled"
+    },
+    "forte-ngrok.service": {
+      "state": "active",
+      "autostart": "enabled"
+    },
+    "forte-awake.service": {
+      "state": "active",
+      "autostart": "enabled"
+    },
+    "forte-demo.service": {
+      "state": "active",
+      "autostart": "enabled"
+    },
+    "forte-jury-model.service": {
+      "state": "inactive",
+      "autostart": "disabled"
+    }
+  },
+  "public_url": "https://fracture-freestyle-unvalued.ngrok-free.dev",
+  "public_ready": true,
+  "inference_source_unchanged_after_freeze": true,
+  "configuration_unchanged_after_freeze": true,
+  "limitations": [
+    "Validation was used repeatedly for selection; seven clips are not a robust performance estimate.",
+    "The seven-video test was not used for Qwen tuning; an earlier CPU comparator had evaluated the same split.",
+    "API checks prove transport and response structure, not semantic correctness.",
+    "Public requests used the event network; an independently connected external client has not been tested.",
+    "Power, hotspot connectivity and ngrok quota remain external dependencies.",
+    "Nearest annotation-anchor error is not event-matched localization accuracy."
+  ],
+  "windows_public_upload": {
+    "synthetic_only": true,
+    "content_duration_sec": 10,
+    "container_padded_for_transport_test": true,
+    "url": "https://fracture-freestyle-unvalued.ngrok-free.dev",
+    "upload_bytes": 29000000,
+    "checks": {
+      "missing_and_wrong_keys_rejected": true,
+      "ready": true
+    },
+    "upload_accept_seconds": 95.016,
+    "status": "done",
+    "verdict": "no_violation",
+    "events": 0,
+    "evidence_frames": 0,
+    "seconds": 112.688,
+    "engine": "qwen_rag",
+    "response_schema_valid": true,
+    "jpeg_pixels_decoded": true,
+    "within_five_minutes": true
+  },
+  "browser_checks": {
+    "public_https": true,
+    "existing_key_authenticated": true,
+    "rule_cards_loaded": 29,
+    "synthetic_h264_mov_preview_ready": true,
+    "synthetic_upload_completed": true,
+    "displayed_elapsed": "00:17",
+    "result": "no_violation",
+    "human_review_limitation_visible": true,
+    "synthetic_demo_evidence_enlargement_checked": true,
+    "proof": "docs/frontend-preview/final-public-synthetic-browser.png"
+  }
+}
