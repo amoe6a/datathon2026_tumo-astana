@@ -104,7 +104,7 @@
   .step-visual { aspect-ratio: 16 / 8; max-height: 270px; }
   .step-body { padding: 23px; }
 }
-/* Reference books illustrate the source catalog; the real rules stay below. */
+/* Document review illustrates checking a source; the real catalog stays below. */
 .sources-overview {
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
@@ -137,14 +137,14 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 57% 48%;
-  filter: saturate(.48) brightness(.76) contrast(1.06);
+  object-position: 47% 47%;
+  filter: saturate(.62) brightness(.88) contrast(1.04);
 }
 .sources-visual::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, #2413272b 0%, #1b102010 45%, #160f21ed 100%);
+  background: linear-gradient(180deg, #24132726 0%, #1b102000 50%, #160f21e6 100%);
   pointer-events: none;
 }
 .sources-visual .source-emblem {
@@ -154,15 +154,15 @@
   top: 18px;
   right: 19px;
   z-index: 1;
-  width: 56px;
-  height: 66px;
-  font-size: 52px;
+  width: 48px;
+  height: 48px;
   color: #efc4d5;
   background: #1a1028b8;
   border: 1px solid #d8acc52e;
   border-radius: 8px;
   backdrop-filter: blur(8px);
 }
+.sources-visual .source-emblem svg { width: 29px; height: 29px; }
 .sources-visual-caption {
   position: absolute;
   z-index: 1;

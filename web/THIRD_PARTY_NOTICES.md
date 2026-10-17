@@ -28,14 +28,14 @@ visible in the photographs.
 
 ## Illustrative photograph in the sources section
 
-`images/sources/law-books.jpg` is a photograph of legal reference books by
-Krists Luhaers: [original photograph](https://unsplash.com/photos/law-books-are-lined-up-on-a-shelf-ioRcKUIiIdw).
+`images/sources/document-review.jpg` is a photograph of two people reviewing
+paperwork by Olena Kholina: [original photograph](https://unsplash.com/photos/two-people-reviewing-documents-at-a-table-MhqUBTxQ3Hw).
 Downloaded on 17 October 2026. The original page identifies it as free to use
 under the standard [Unsplash License](https://unsplash.com/license).
 The JPEG is served locally, with cropping and muted colors applied in CSS.
 The page includes an illustration label and photographer credit.
 
-This is a decorative illustration of reference material, not a photograph
+This is a decorative illustration of document review, not a photograph
 of the applicable Kazakhstan regulation, a source citation, bank footage,
 evidence or an ML dataset item. Actual regulatory sources remain in the
 authenticated catalog and result cards. No endorsement is implied.
