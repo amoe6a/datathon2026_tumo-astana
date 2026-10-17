@@ -1,5 +1,6 @@
 .venv
 .venv-inference
+.venv-training
 __pycache__/
 .pytest_cache/
 .env

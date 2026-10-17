@@ -30,8 +30,8 @@ class Settings:
         if len(key) < 16:
             raise RuntimeError("Set FORTE_API_KEY to a random secret of at least 16 characters.")
         engine = os.getenv("FORTE_ENGINE", "reference")
-        if engine not in {"demo", "reference", "qwen"}:
-            raise RuntimeError("FORTE_ENGINE must be demo, reference or qwen")
+        if engine not in {"demo", "reference", "qwen", "qwen_rag"}:
+            raise RuntimeError("FORTE_ENGINE must be demo, reference, qwen or qwen_rag")
         return cls(key, engine, Path(os.getenv("FORTE_MODEL", str(ROOT / "models/reference.npz"))),
                    Path(os.getenv("FORTE_RUNTIME", str(ROOT / "runtime"))),
                    Path(os.getenv("FORTE_RULES", str(ROOT / "rules/catalog.json"))),

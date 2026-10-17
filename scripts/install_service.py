@@ -74,6 +74,22 @@ def install(args):
             'KillMode=control-group\nUMask=0077\n'
             'StandardOutput=append:' + str(runtime/'native.log') + '\nStandardError=inherit\n'
             '[Install]\nWantedBy=default.target\n')
+    elif args.engine == 'qwen_rag':
+        if not args.config:
+            raise ValueError('Qwen RAG requires --config')
+        from ml.qwen_rag import load_config
+        from ml.rag import RuleRetriever
+        config = Path(args.config).resolve()
+        selected = load_config(config)
+        for name in ('base_model', 'rag_folder'):
+            if not Path(selected[name]).is_dir():
+                raise ValueError('Qwen model or rule directory is missing')
+        if selected.get('adapter') and not Path(selected['adapter']).is_dir():
+            raise ValueError('Selected Qwen adapter is missing')
+        catalog_path = runtime/'rule-catalog.json'
+        catalog_path.write_text(json.dumps({'rules': list(RuleRetriever(selected['rag_folder']).catalog().values())},
+                                          ensure_ascii=False, indent=2), encoding='utf-8')
+        env.update(FORTE_MODEL=str(config), FORTE_RULES=str(catalog_path), FORTE_READINESS_TIMEOUT='120')
     elif not (ROOT/'models/demo.npz').is_file():
         raise ValueError('Generate synthetic fixtures first: python -m scripts.make_demo')
     env_path = runtime/'service.env'
@@ -101,7 +117,7 @@ def install(args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--name', required=True)
-    parser.add_argument('--engine', choices=['demo', 'bonsai'], required=True)
+    parser.add_argument('--engine', choices=['demo', 'bonsai', 'qwen_rag'], required=True)
     parser.add_argument('--port', type=int, required=True)
     parser.add_argument('--python', default=sys.executable)
     parser.add_argument('--runtime')

@@ -60,11 +60,18 @@ def analyze(path, model, engine, rule_path, progress=lambda p, s: None):
     progress(5, "Decoding video locally")
     frames, duration = sample_video(path, fps=2)
     rules = load_rules(rule_path, engine == "demo")
+    if engine == 'qwen_rag':
+        from ml.qwen_rag import load_config
+        from ml.rag import RuleRetriever
+        rules = RuleRetriever(load_config(model)['rag_folder']).catalog()
     if not rules:
         raise ValueError("No enabled, reviewed rules available")
     progress(20, "Analyzing visible actions")
     warnings = []
-    if engine == "qwen":
+    if engine == 'qwen_rag':
+        from ml.qwen_rag import analyze_rag
+        events, warnings = analyze_rag(frames, model, progress)
+    elif engine == "qwen":
         from ml.qwen import analyze_qwen
         events, warnings = analyze_qwen(frames, model, rules, progress)
     elif engine == "bonsai":

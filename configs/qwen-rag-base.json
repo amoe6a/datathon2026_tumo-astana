@@ -1,0 +1,12 @@
+{
+  "base_model": "models/qwen3-vl-2b",
+  "adapter": null,
+  "rag_folder": "rules/rag",
+  "quantized": true,
+  "window_sec": 24,
+  "stride_sec": 20,
+  "frames_per_window": 12,
+  "retrieval_k": 4,
+  "observation_tokens": 300,
+  "decision_tokens": 320
+}

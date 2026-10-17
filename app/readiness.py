@@ -22,6 +22,16 @@ MESSAGES = {
 
 def fingerprint(settings):
     paths = [settings.rules]
+    if settings.engine == 'qwen_rag':
+        from ml.qwen_rag import load_config
+        config = load_config(settings.model)
+        for key in ('base_model', 'adapter', 'rag_folder'):
+            if config.get(key):
+                folder = Path(config[key])
+                if not folder.exists():
+                    raise FileNotFoundError('Qwen configuration dependency is missing')
+                paths += sorted(p for p in folder.rglob('*') if p.is_file() and
+                                p.suffix in {'.json', '.safetensors'})
     if settings.model.is_dir():
         paths += sorted(p for p in settings.model.rglob('*')
                         if p.is_file() and p.suffix in {'.json', '.safetensors', '.gguf', '.npz'})
@@ -46,6 +56,15 @@ def probe_model(model, engine, rules):
                 or scores.shape != (len(frames), len(labels))
                 or not np.isfinite(scores).all() or not 0 < threshold < 1):
             raise ValueError('Invalid model shape, values or class-to-rule mapping')
+    elif engine == 'qwen_rag':
+        from ml.qwen_rag import RagSession, load_config
+        from ml.scene import read_json, readable
+        if readable(frames):
+            raise ValueError('Blank-frame rejection failed')
+        session = RagSession(load_config(model))
+        value = read_json(session.generate(frames, 'Return only this JSON: {"ok":true}', 32, adapter=False))
+        if value != {'ok': True}:
+            raise ValueError('Synthetic Qwen generation check failed')
     elif engine in {'qwen', 'bonsai'}:
         from ml.qwen import QwenSession, parse_events, qwen_prompt
         if engine == 'qwen':

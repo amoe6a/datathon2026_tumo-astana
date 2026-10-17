@@ -1,0 +1,5 @@
+# Add to the existing verified CUDA inference environment; see docs/qwen-training-deployment.md.
+peft==0.21.2
+bitsandbytes==0.50.2
+# This exact upstream revision fixes Transformers 5 tokenizer imports.
+lm-format-enforcer @ git+https://github.com/noamgat/lm-format-enforcer.git@817f944fcc8851917c40300a47f62d1defc3ffc3

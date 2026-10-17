@@ -1,0 +1,68 @@
+"""Real multipart/API contract check. Writes aggregate diagnostics, never evidence or keys."""
+import argparse
+import base64
+import json
+import math
+from pathlib import Path
+import time
+import httpx
+
+
+def verify(args):
+    key=Path(args.key_file).read_text(encoding='utf-8').strip()
+    report={'url':args.url,'upload_bytes':Path(args.video).stat().st_size,'checks':{}}
+    headers={'X-API-Key':key}
+    with httpx.Client(base_url=args.url,timeout=60,trust_env=False,follow_redirects=False) as client:
+        for path in ['/api/v1/jobs/'+'a'*32,'/api/v1/rules']:
+            for auth in ({},{'X-API-Key':'invalid-jury-key'}):
+                response=client.get(path,headers=auth)
+                assert response.status_code==401,(path,response.status_code)
+        for auth in ({},{'X-API-Key':'invalid-jury-key'}):
+            response=client.post('/api/v1/analyze',headers=auth,files={'file':('tiny.mov',b'invalid','video/quicktime')})
+            assert response.status_code==401,response.status_code
+        report['checks']['missing_and_wrong_keys_rejected']=True
+        response=client.get('/ready');response.raise_for_status()
+        assert response.json()['ready'] is True
+        report['checks']['ready']=True
+        started=time.monotonic()
+        with open(args.video,'rb') as stream:
+            response=client.post('/api/v1/analyze',headers=headers,
+                files={'file':(Path(args.video).name,stream,'video/quicktime')})
+        assert response.status_code==202,response.status_code
+        accepted=response.json();assert accepted['status']=='processing'
+        jid=accepted['job_id'];report['job_id']=jid
+        while time.monotonic()-started<300:
+            response=client.get('/api/v1/jobs/'+jid,headers=headers);response.raise_for_status()
+            result=response.json();assert result['status'] in ['processing','done','failed']
+            if result['status']=='failed':
+                report.update(status='failed',error=result.get('error',''),seconds=round(time.monotonic()-started,3))
+                break
+            if result['status']=='done':
+                assert result['verdict'] in ['violation','no_violation']
+                assert (result['verdict']=='violation')==bool(result['violations'])
+                frames=0
+                for event in result['violations']:
+                    assert isinstance(event['type'],str) and event['type']
+                    assert isinstance(event['description'],str) and event['description']
+                    assert isinstance(event['timecode_sec'],(int,float)) and math.isfinite(event['timecode_sec'])
+                    assert 1<=len(event['evidence_frames'])<=3
+                    for frame in event['evidence_frames']:
+                        decoded=base64.b64decode(frame['image_base64'],validate=True)
+                        assert decoded.startswith(b'\xff\xd8') and decoded.endswith(b'\xff\xd9')
+                        assert isinstance(frame['timestamp_sec'],(int,float))
+                        frames+=1
+                report.update(status='done',verdict=result['verdict'],events=len(result['violations']),
+                    evidence_frames=frames,seconds=round(time.monotonic()-started,3),
+                    engine=result.get('meta',{}).get('engine'),response_schema_valid=True)
+                break
+            time.sleep(3)
+        else:report.update(status='timeout',seconds=round(time.monotonic()-started,3))
+    Path(args.output).write_text(json.dumps(report,indent=2),encoding='utf-8')
+    print(json.dumps(report))
+    if report['status']!='done':raise SystemExit(1)
+
+
+if __name__=='__main__':
+    p=argparse.ArgumentParser();p.add_argument('video');p.add_argument('--url',required=True)
+    p.add_argument('--key-file',required=True);p.add_argument('--output',required=True)
+    verify(p.parse_args())
