@@ -123,6 +123,9 @@
       const result = await request("/health", {}, 6000);
       if (result.status !== "ok") throw new Error("Health status is not ok");
       state.demo = result.demo_only === true;
+      state.localTest = result.local_test === true;
+      $("apiKeyField").hidden = state.localTest;
+      $("apiKey").required = !state.localTest;
       state.modelReady = result.ready === true;
       $("serviceStatus").dataset.state = state.modelReady ? "ready" : "error";
       $("serviceStatus").lastElementChild.textContent = !state.modelReady ? "Модель не настроена" : state.demo ? "Сервис доступен · демо" : "Сервис доступен";
@@ -184,6 +187,7 @@
     return true;
   }
   function validateKey() {
+    if (state.localTest) return true;
     if (!$("apiKey").value.trim()) { showError("Введите ключ доступа команды.", "key"); return false; }
     if (/[\r\n\x00-\x1f\u0100-\uffff]/.test($("apiKey").value)) { showError("Проверьте ключ: используйте выданный командой API-ключ без переносов строки.", "key"); return false; }
     return true;

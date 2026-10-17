@@ -8,11 +8,11 @@ import subprocess
 import threading
 import time
 import uuid
-from fastapi import FastAPI, Depends, Header, HTTPException, UploadFile, File
+from fastapi import FastAPI, Depends, Header, HTTPException, UploadFile, File, Request
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from app.config import Settings, ROOT
-from app.limits import ApiLimits
+from app.limits import ApiLimits, local_test_request
 from app.readiness import ModelReadiness
 from app.lifecycle import RuntimeLease, cleanup_job, valid_job_id
 from app.processes import start_child, stop_child
@@ -177,7 +177,7 @@ def create_app(settings=None):
     app=FastAPI(title="Forte Review", version="0.1.0", docs_url="/docs", lifespan=lifespan)
     app.state.jobs=jobs
     app.state.readiness=readiness
-    app.add_middleware(ApiLimits,key=settings.api_key,max_bytes=(settings.max_upload_mb+1)*1024*1024)
+    app.add_middleware(ApiLimits,key=settings.api_key,max_bytes=(settings.max_upload_mb+1)*1024*1024,local_test=settings.local_test)
 
     def authenticate(x_api_key: str = Header(default="")):
         if not hmac.compare_digest(x_api_key.encode(), settings.api_key.encode()):
@@ -193,15 +193,16 @@ def create_app(settings=None):
         return response
 
     @app.get("/health")
-    def health():
+    def health(request: Request):
         check=readiness.snapshot()
         return {"status":"ok", "engine":settings.engine, "model_present":settings.model.exists(),
                 "demo_only":settings.engine=="demo", "ready":check['ready'], "readiness":check,
+                "local_test": settings.local_test and local_test_request(request.scope),
                 **jobs.maintenance_info()}
 
     @app.get("/ready")
-    def ready():
-        value=health()
+    def ready(request: Request):
+        value=health(request)
         return JSONResponse(value,status_code=200 if value['ready'] else 503)
 
     @app.post("/api/v1/analyze", status_code=202, dependencies=[Depends(authenticate)])

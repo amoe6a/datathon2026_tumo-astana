@@ -15,6 +15,7 @@ class Settings:
     timeout: float = 270
     max_upload_mb: int = 64
     readiness_timeout: float = 90
+    local_test: bool = False
 
     def __post_init__(self):
         if not math.isfinite(self.timeout) or not 0 < self.timeout <= 270:
@@ -37,4 +38,5 @@ class Settings:
                    Path(os.getenv("FORTE_RULES", str(ROOT / "rules/catalog.json"))),
                    min(270, float(os.getenv("FORTE_JOB_TIMEOUT", "270"))),
                    int(os.getenv("FORTE_MAX_UPLOAD_MB", "64")),
-                   min(120, float(os.getenv("FORTE_READINESS_TIMEOUT", "90"))))
+                   min(120, float(os.getenv("FORTE_READINESS_TIMEOUT", "90"))),
+                   os.getenv("FORTE_LOCAL_TEST", "0") == "1")

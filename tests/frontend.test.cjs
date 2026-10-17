@@ -8,7 +8,7 @@ const root = path.resolve(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'web/index.html'), 'utf8');
 const script = fs.readFileSync(path.join(root, 'web/app.js'), 'utf8');
 
-function setup(route = () => ({})) {
+function setup(route = () => ({}), localTest = false) {
   const ids = new Map();
   let now = 1000000;
   let focused = null;
@@ -61,7 +61,7 @@ function setup(route = () => ({})) {
     File: class { constructor(parts, name) { this.name = name; this.size = parts.reduce((sum, p) => sum + (p.size || 1), 0); } },
     fetch: async (url, options) => {
       requests.push({ url, options });
-      const value = url === '/health' ? { status: 'ok', model_present: true, ready: true, demo_only: true } : await route(url, options);
+      const value = url === '/health' ? { status: 'ok', model_present: true, ready: true, demo_only: true, local_test: localTest } : await route(url, options);
       if (value instanceof Error) throw value;
       const status = value?.httpStatus || 200;
       return { ok: status < 400, status, headers: { get: () => value?.retryAfter || null },
@@ -77,6 +77,16 @@ function setup(route = () => ({})) {
     advance: ms => { now += ms; for (const callback of [...intervals.values()]) callback(); } };
 }
 const empty = { job_id: 'a'.repeat(16), status: 'done', verdict: 'no_violation', violations: [], meta: { warnings: [] } };
+
+test('local testing hides key field and submits without a key', async () => {
+  const ui = setup(url => url === '/api/v1/analyze' ? { status: 'processing', job_id: empty.job_id } : empty, true);
+  await ui.settle();
+  assert.equal(ui.get('apiKeyField').hidden, true);
+  assert.equal(ui.get('apiKey').required, false);
+  ui.file(); await ui.submit();
+  assert.equal(ui.requests.filter(x => x.url === '/api/v1/analyze').length, 1);
+  assert.equal(ui.get('resultSection').hidden, false);
+});
 
 test('missing key and missing file are explained without submitting', async () => {
   const ui = setup(); await ui.submit();
