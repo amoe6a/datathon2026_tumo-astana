@@ -1,0 +1,20 @@
+{
+  "base_model": "models/qwen3-vl-2b",
+  "adapter": null,
+  "rag_folder": "rules/rag",
+  "quantized": false,
+  "window_sec": 24,
+  "stride_sec": 20,
+  "frames_per_window": 16,
+  "retrieval_k": 4,
+  "image_side": 448,
+  "max_pixels": 131072,
+  "observation_tokens": 300,
+  "decision_tokens": 1024,
+  "guided_json": true,
+  "decision_adapter": true,
+  "include_scene_context": true,
+  "rule_language": "ru",
+  "global_refine_events": true,
+  "refine_frames": 48
+}

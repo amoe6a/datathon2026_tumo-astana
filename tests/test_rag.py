@@ -167,3 +167,25 @@ def test_refinement_cannot_add_unproposed_rule_or_retain_rejected_candidate():
     assert session.refine(frames,proposals,cards)==([],True)
     session.generate=lambda *a,**kw:json.dumps(decision('CASH-003'))
     with pytest.raises(ValueError,match='unknown retrieved rule'):session.refine(frames,proposals,cards)
+
+
+def test_window_proposals_require_whole_clip_verification_when_enabled():
+    import json
+    from types import SimpleNamespace
+    from ml.qwen_rag import RagSession
+    session=RagSession.__new__(RagSession)
+    session.config={'window_sec':2,'stride_sec':2,'frames_per_window':2,
+                    'global_refine_events':True,'guided_json':True}
+    index=RuleRetriever(ROOT/'rules/rag');card=index.by_id['CASH-001']
+    session.retriever=SimpleNamespace(retrieve=lambda *a:[card],prompt_card=index.prompt_card,by_id=index.by_id)
+    session.generate=lambda *a,**kw:json.dumps(decision()) if kw.get('schema') else 'Synthetic actor leaves the counter.'
+    seen=[]
+    def verify(available,proposals,cards):
+        seen.append([f.time for f in available]);assert proposals
+        return [],False
+    session.refine=verify
+    pixels=np.zeros((64,64,3),dtype=np.uint8);pixels[:32]=180
+    frames=[Frame(float(i),pixels) for i in range(5)]
+    events,_=session.analyze(frames)
+    assert seen==[[0.,1.,2.,3.,4.]] and events==[]
+    assert len(session.last_observations)==2

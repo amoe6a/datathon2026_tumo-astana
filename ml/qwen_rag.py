@@ -1,5 +1,6 @@
 """Local Qwen observations -> rule retrieval -> visual condition checks."""
 from contextlib import nullcontext
+from collections import Counter
 import json
 import math
 from pathlib import Path
@@ -146,6 +147,13 @@ class RagSession:
                         events.append(event)
             progress(20+int(65*(n+1)/len(starts)),f'Checked visible actions and rules in segment {n+1}/{len(starts)}')
         if not observations:raise ValueError('No readable analysis window could be processed')
+        if events and self.config.get('global_refine_events',False):
+            # Short windows can omit a transaction boundary or an exception.
+            # Recheck proposed rules with whole-clip context before accepting them.
+            counts=Counter(e['rule_id'] for e in events)
+            ids=sorted(counts,key=lambda k:(-counts[k],k))[:4]
+            events,uncertain=self.refine(frames,events,[self.retriever.by_id[k] for k in ids])
+            if uncertain:warnings.append('Human review: whole-clip verification found incomplete context')
         self.last_observations=observations
         return events,warnings
 
@@ -153,7 +161,12 @@ class RagSession:
         """Recheck proposed rule IDs on denser frames; proposals are not evidence."""
         ids={e['rule_id'] for e in proposals}
         candidates=[c for c in cards if c['rule_id'] in ids and c['decision_mode']=='conditional']
-        selected=select_frames(available,int(self.config.get('refine_frames',48)))
+        budget=int(self.config.get('refine_frames',48))
+        anchors=[]
+        if self.config.get('global_refine_events',False):
+            anchors=sorted(set(e['timecode_sec'] for e in proposals))
+            if len(anchors)>8:anchors=[anchors[round(i*(len(anchors)-1)/7)] for i in range(8)]
+        selected=select_frames(available,max(8,budget-3*len(anchors)),anchors)
         if not readable(selected):raise ValueError('Event verification frames are unreadable')
         prompt=(
             'Review this chronological sequence again with denser sampling. The rule cards below '
