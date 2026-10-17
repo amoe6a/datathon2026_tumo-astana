@@ -61,6 +61,28 @@
   background: #f5a3b6;
   box-shadow: 0 0 16px #fa8e9b55;
 }
+.planet-four {
+  --planet-size: 24px;
+  --orbit-radius: 319.5px;
+  --start-angle: -35deg;
+  --orbit-period: 34s;
+  background: linear-gradient(130deg, #b5e5d7, #47756f 70%);
+}
+.planet-five {
+  --planet-size: 18px;
+  --orbit-radius: 539.5px;
+  --start-angle: -150deg;
+  --orbit-period: 46s;
+  animation-direction: reverse;
+  background: linear-gradient(130deg, #f4c8e6, #885a91 70%);
+}
+.planet-six {
+  --planet-size: 20px;
+  --orbit-radius: 319.5px;
+  --start-angle: -145deg;
+  --orbit-period: 40s;
+  background: linear-gradient(130deg, #e1d1ff, #8061a5 70%);
+}
 @keyframes satellite-orbit {
   from { transform: rotate(var(--start-angle)) translateX(var(--orbit-radius)); }
   to { transform: rotate(calc(var(--start-angle) + 360deg)) translateX(var(--orbit-radius)); }
@@ -86,5 +108,6 @@
     animation-play-state: paused !important;
   }
   .orbits[data-motion="running"] .planet { animation-play-state: running !important; }
-  .orbits[data-motion] .planet-two { animation-direction: reverse !important; }
+  .orbits[data-motion] .planet-two,
+  .orbits[data-motion] .planet-five { animation-direction: reverse !important; }
 }
