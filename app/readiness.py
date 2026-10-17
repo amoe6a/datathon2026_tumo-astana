@@ -16,6 +16,7 @@ MESSAGES = {
     'model_invalid': 'Model, rules or inference response failed the startup check',
     'probe_failed': 'Model could not load or run; check local installation and available memory',
     'restart_required': 'Model or rules changed; restart to check the new configuration',
+    'model_unavailable': 'Local model server is unavailable; wait for recovery or restart its service',
 }
 
 
@@ -111,6 +112,17 @@ class ModelReadiness:
                 changed = True
             if changed:
                 value.update(ready=False, code='restart_required', message=MESSAGES['restart_required'])
+        if value['ready'] and self.settings.engine == 'bonsai':
+            import httpx
+            from ml.bonsai import checked_endpoint
+            try:
+                config = json.loads(self.settings.model.read_text(encoding='utf-8'))
+                endpoint = checked_endpoint(config['endpoint'])
+                with httpx.Client(timeout=.75, trust_env=False, follow_redirects=False) as client:
+                    response = client.get(endpoint + '/health')
+                    response.raise_for_status()
+            except (httpx.HTTPError, OSError, ValueError, KeyError):
+                value.update(ready=False, code='model_unavailable', message=MESSAGES['model_unavailable'])
         return value
 
 

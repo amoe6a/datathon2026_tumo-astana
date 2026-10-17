@@ -14,7 +14,11 @@ from scripts.make_demo import clip
 @pytest.mark.parametrize('rule_id,status',[('cashier_leaves','done'),('invented','failed')])
 def test_bonsai_worker_http_and_evidence(tmp_path,rule_id,status):
     calls = 0
+    healthy = True
     class Handler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            self.send_response(200 if healthy else 503)
+            self.send_header('Content-Length','0');self.end_headers()
         def do_POST(self):
             nonlocal calls
             calls += 1
@@ -35,6 +39,15 @@ def test_bonsai_worker_http_and_evidence(tmp_path,rule_id,status):
     try:
         with TestClient(create_app(settings)) as client:
             headers={'X-API-Key':key}
+            assert client.get('/ready').status_code == 200
+            healthy = False
+            assert client.get('/ready').status_code == 503
+            blocked = client.post('/api/v1/analyze', headers=headers,
+                                  files={'file':('synthetic.mov',b'synthetic placeholder')})
+            assert blocked.status_code == 503
+            assert client.get('/health').json()['readiness']['code'] == 'model_unavailable'
+            healthy = True
+            assert client.get('/ready').status_code == 200
             with video.open('rb') as stream:
                 response=client.post('/api/v1/analyze',headers=headers,files={'file':('synthetic.mov',stream)})
             assert response.status_code==202
