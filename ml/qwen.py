@@ -5,19 +5,26 @@ from pathlib import Path
 import cv2
 from PIL import Image
 
-def make_windows(frames):
+def make_windows(frames, window_sec=8, stride_sec=6, sampling_fps=1):
+    if not frames or not all(math.isfinite(v) and v > 0 for v in (window_sec, stride_sec, sampling_fps)) or stride_sec > window_sec:
+        raise ValueError("Invalid temporal sampling configuration")
     windows = []
     t = 0.0
     while t <= frames[-1].time:
-        observed = [f for f in frames if t <= f.time <= t+8]
-        window = observed[::2]
+        observed = [f for f in frames if t <= f.time <= t+window_sec]
+        window = []
+        next_at = t
+        for frame in observed:
+            if frame.time + 1e-6 >= next_at:
+                window.append(frame)
+                next_at = frame.time + 1 / sampling_fps
         if window:
             if window[-1] is not observed[-1]:
                 window.append(observed[-1])
             windows.append(window)
-        if t + 8 >= frames[-1].time:
+        if t + window_sec >= frames[-1].time:
             break
-        t += 6
+        t += stride_sec
     return windows
 
 
@@ -107,7 +114,7 @@ def analyze_qwen(frames, model_path, rules, progress):
 
 
 def analyze_session(frames, session, rules, progress):
-    windows = make_windows(frames)
+    windows = make_windows(frames, **getattr(session, 'window_settings', {}))
     prompt = qwen_prompt(rules)
     events, warnings = [], []
     for n, window in enumerate(windows):

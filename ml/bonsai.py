@@ -26,6 +26,12 @@ class BonsaiSession:
         settings=json.loads(Path(config).read_text())
         endpoint=checked_endpoint(settings['endpoint'])
         self.model=settings.get('model_alias','forte-bonsai')
+        self.window_settings = {'window_sec': settings.get('windows_sec', 8),
+                                'stride_sec': settings.get('stride_sec', 6),
+                                'sampling_fps': settings.get('frame_sampling_fps', 1)}
+        self.image_max_side = settings.get('image_max_side', 448)
+        if not isinstance(self.image_max_side, int) or not 224 <= self.image_max_side <= 2048:
+            raise ValueError('Invalid local image resolution limit')
         self.client=httpx.Client(base_url=endpoint,timeout=120,trust_env=False,
                                  follow_redirects=False,transport=transport)
         self.last_usage={}
@@ -38,7 +44,8 @@ class BonsaiSession:
         for frame in window:
             image=frame.bgr
             h,w=image.shape[:2]
-            if max(h,w)>448:image=cv2.resize(image,(round(w*448/max(h,w)),round(h*448/max(h,w))))
+            if max(h,w)>self.image_max_side:
+                image=cv2.resize(image,(round(w*self.image_max_side/max(h,w)),round(h*self.image_max_side/max(h,w))))
             ok,data=cv2.imencode('.jpg',image,[cv2.IMWRITE_JPEG_QUALITY,85])
             if not ok:raise ValueError('Model input image encoding failed')
             content.extend([{'type':'text','text':f'Timestamp {frame.time:.3f} seconds'},

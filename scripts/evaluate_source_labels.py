@@ -8,16 +8,14 @@ from collections import Counter,defaultdict
 import json
 from pathlib import Path
 import numpy as np
-from ml.manifest import sha256,source_label_digest
+from ml.manifest import sha256,validate_frozen_split
 from scripts.evaluate import metrics
 
 
 def evaluate_source(manifest,split_file,predictions,split):
     path=Path(manifest);rows=json.loads(path.read_text(encoding='utf-8'))['videos']
     frozen=json.loads(Path(split_file).read_text(encoding='utf-8'))
-    if frozen['dataset_hashes']!=[r['sha256'] for r in rows]:raise ValueError('Frozen split mismatch')
-    if 'source_labels_sha256' in frozen and frozen['source_labels_sha256']!=source_label_digest(rows):
-        raise ValueError('Organizer labels changed after split freeze')
+    validate_frozen_split(rows, frozen)
     hash_splits={};labels={};signatures=set();groups=defaultdict(list);results={}
     for index,(row,sp) in enumerate(zip(rows,frozen['splits'])):
         digest=sha256(path.parent/row['path'])

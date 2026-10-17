@@ -1,0 +1,23 @@
+{
+  "endpoint": "http://127.0.0.1:18080",
+  "model_alias": "forte-bonsai",
+  "model_revision": "b072e1d3b35a0a630cece372c2127528e0994386",
+  "runtime_commit": "e3de715222b2667c54a267441159a5729f11155e",
+  "context_tokens": 4096,
+  "parallel": 1,
+  "image_min_tokens": 256,
+  "image_max_tokens": 256,
+  "projector_device": "cpu",
+  "gpu_layers": 99,
+  "batch_size": 256,
+  "ubatch_size": 128,
+  "reasoning_budget": 0,
+  "max_new_tokens": 400,
+  "temperature": 0,
+  "windows_sec": 32,
+  "stride_sec": 24,
+  "frame_sampling_fps": 0.25,
+  "runtime_source_manifest": "runtime/bonsai-setup/source-manifest.json",
+  "cpu_threads": 12,
+  "image_max_side": 896
+}

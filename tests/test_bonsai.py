@@ -41,3 +41,20 @@ def test_bonsai_does_not_follow_redirects(tmp_path):
         with pytest.raises(httpx.HTTPStatusError):
             session.infer([],'prompt')
     finally:session.close()
+
+
+@pytest.mark.parametrize('limit,expected_height', [(448, 448), (896, 848)])
+def test_bonsai_resolution_reaches_local_model(tmp_path, limit, expected_height):
+    import base64
+    import cv2
+    config = tmp_path / 'config.json'
+    config.write_text(json.dumps({'endpoint': 'http://127.0.0.1:8080', 'image_max_side': limit}))
+    def respond(request):
+        content = json.loads(request.content)['messages'][0]['content']
+        encoded = content[-1]['image_url']['url'].split(',', 1)[1]
+        image = cv2.imdecode(np.frombuffer(base64.b64decode(encoded), np.uint8), cv2.IMREAD_COLOR)
+        assert image.shape[0] == expected_height
+        return httpx.Response(200, json={'choices': [{'finish_reason': 'stop', 'message': {'content': '{}'}}]})
+    session = BonsaiSession(config, transport=httpx.MockTransport(respond))
+    try: session.infer([Frame(0, np.zeros((848, 464, 3), np.uint8))], 'synthetic')
+    finally: session.close()
