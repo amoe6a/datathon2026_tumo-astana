@@ -1,4 +1,5 @@
 import json
+import numpy as np
 import pytest
 from fastapi.testclient import TestClient
 from app.main import create_app
@@ -7,7 +8,9 @@ from app.limits import ApiLimits
 from ml.qwen import parse_events
 
 def test_admission_and_request_limits(tmp_path):
-    model=tmp_path/'present.npz';model.write_bytes(b'placeholder')
+    model=tmp_path/'present.npz'
+    np.savez(model,mean=np.zeros(4608),scale=np.ones(4608),coef=np.zeros((1,4608)),
+             intercept=np.zeros(1),labels=np.array(['normal','cashier_leaves']),threshold=.8,demo_only=False)
     settings=Settings('edge-test-secret-1234','reference',model,tmp_path/'runtime',ROOT/'rules/catalog.json',10,1)
     with TestClient(create_app(settings)) as c:
         h={'X-API-Key':settings.api_key}

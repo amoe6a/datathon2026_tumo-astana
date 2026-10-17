@@ -5,7 +5,6 @@ import json
 from pathlib import Path
 import sqlite3
 import subprocess
-import sys
 import threading
 import time
 import uuid
@@ -14,6 +13,9 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from app.config import Settings, ROOT
 from app.limits import ApiLimits
+from app.readiness import ModelReadiness
+from app.lifecycle import RuntimeLease, cleanup_job, valid_job_id
+from app.processes import start_child, stop_child
 
 class Jobs:
     def __init__(self, settings):
@@ -21,13 +23,72 @@ class Jobs:
         self.s.runtime.mkdir(parents=True, exist_ok=True)
         self.db_path = self.s.runtime / "jobs.sqlite3"
         self.slot = threading.BoundedSemaphore(1)
+        self._lock = threading.Lock()
+        self._closing = threading.Event()
+        self._active = None
+        self._thread = None
+        self._reaper = None
+        self._pending = {}
         with self.db() as c:
             c.execute("CREATE TABLE IF NOT EXISTS jobs (id TEXT PRIMARY KEY, created REAL, payload TEXT)")
+
+    def recover(self):
+        # Called only after obtaining exclusive ownership of this runtime.
+        with self.db() as c:
             for jid, payload in c.execute("SELECT id,payload FROM jobs").fetchall():
                 obj=json.loads(payload)
                 if obj["status"] == "processing":
                     obj.update(status="failed", error="Server restarted during processing; upload again")
                     c.execute("UPDATE jobs SET payload=? WHERE id=?", (json.dumps(obj), jid))
+        for folder in self.s.runtime.iterdir():
+            if folder.is_dir() and valid_job_id(folder.name):
+                self.cleanup(folder.name)
+
+    def cleanup(self, jid):
+        count = cleanup_job(self.s.runtime, jid)
+        with self._lock:
+            if count:
+                self._pending[jid] = count
+            else:
+                self._pending.pop(jid, None)
+
+    def retry_cleanup(self):
+        with self._lock:
+            ids = list(self._pending)
+        for jid in ids:
+            self.cleanup(jid)
+
+    def maintenance(self):
+        while not self._closing.wait(5):
+            self.retry_cleanup()
+
+    def start(self):
+        self._reaper = threading.Thread(target=self.maintenance, daemon=True)
+        self._reaper.start()
+
+    def maintenance_info(self):
+        with self._lock:
+            return {'cleanup_pending_files': sum(self._pending.values()),
+                    'accepting_jobs': not self._closing.is_set()}
+
+    def launch(self, jid, video):
+        with self._lock:
+            if self._closing.is_set():
+                raise HTTPException(503, 'Server is shutting down; retry after restart')
+            self._thread = threading.Thread(target=self.run, args=(jid, video), daemon=True)
+            self._thread.start()
+
+    def close(self):
+        self._closing.set()
+        with self._lock:
+            process, thread = self._active, self._thread
+        if process is not None:
+            stop_child(process)
+        if thread is not None:
+            thread.join(timeout=10)
+        if self._reaper is not None:
+            self._reaper.join(timeout=3)
+        self.retry_cleanup()
 
     def db(self):
         return sqlite3.connect(self.db_path, timeout=10)
@@ -55,35 +116,67 @@ class Jobs:
     def run(self, jid, video):
         folder=video.parent
         result_path=folder/"result.json"
-        cmd=[sys.executable, "-m", "ml.worker", "--input", str(video.resolve()), "--model", str(self.s.model.resolve()),
+        cmd=["--input", str(video.resolve()), "--model", str(self.s.model.resolve()),
              "--engine", self.s.engine, "--rules", str(self.s.rules.resolve()), "--output", str(result_path.resolve()),
              "--progress", str((folder/"progress.json").resolve())]
         started=time.monotonic()
+        process=None
+        payload={"job_id":jid,"status":"failed","error":"Local processing failed; no verdict was produced"}
         try:
-            # Child process is killable: a hung decoder/model cannot keep the only slot forever.
-            completed=subprocess.run(cmd, cwd=ROOT, timeout=self.s.timeout, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            if completed.returncode or not result_path.exists():
+            process=start_child('job', cmd)
+            with self._lock:
+                self._active=process
+                closing=self._closing.is_set()
+            if closing:
+                raise RuntimeError('Server stopped during processing; upload again')
+            code=process.wait(timeout=self.s.timeout)
+            if code or not result_path.exists():
                 raise RuntimeError("Local worker exited without a result")
             result=json.loads(result_path.read_text(encoding="utf-8"))
             if not result["ok"]:
                 raise RuntimeError(result["error"])
             payload={"job_id":jid, "status":"done", **result["result"]}
             payload["meta"]["wall_time_sec"]=round(time.monotonic()-started,3)
-            self.save(jid, payload)
         except subprocess.TimeoutExpired:
-            self.save(jid,{"job_id":jid,"status":"failed","error":"Processing exceeded the time budget; no verdict was produced"})
-        except Exception as e:
-            self.save(jid,{"job_id":jid,"status":"failed","error":str(e)[:500]})
+            payload={"job_id":jid,"status":"failed","error":"Processing exceeded the time budget; no verdict was produced"}
+        except RuntimeError as error:
+            payload={"job_id":jid,"status":"failed","error":str(error)[:500]}
+        except Exception:
+            payload={"job_id":jid,"status":"failed","error":"Local processing failed; no verdict was produced"}
         finally:
-            video.unlink(missing_ok=True)  # raw uploads never become public assets
-            result_path.unlink(missing_ok=True)
-            self.slot.release()
+            try:
+                if process is not None:
+                    stop_child(process)
+                self.cleanup(jid)
+                self.save(jid,payload)
+            finally:
+                with self._lock:
+                    self._active=None
+                self.slot.release()
 
 def create_app(settings=None):
     settings=settings or Settings.from_env()
     jobs=Jobs(settings)
-    app=FastAPI(title="Forte Review", version="0.1.0", docs_url="/docs")
+    readiness=ModelReadiness(settings)
+    lease=RuntimeLease(settings.runtime)
+
+    @asynccontextmanager
+    async def lifespan(app):
+        lease.acquire()
+        try:
+            await asyncio.to_thread(jobs.recover)
+            await asyncio.to_thread(readiness.check)
+            jobs.start()
+            yield
+        finally:
+            try:
+                await asyncio.to_thread(jobs.close)
+            finally:
+                lease.release()
+
+    app=FastAPI(title="Forte Review", version="0.1.0", docs_url="/docs", lifespan=lifespan)
     app.state.jobs=jobs
+    app.state.readiness=readiness
     app.add_middleware(ApiLimits,key=settings.api_key,max_bytes=(settings.max_upload_mb+1)*1024*1024)
 
     def authenticate(x_api_key: str = Header(default="")):
@@ -101,26 +194,34 @@ def create_app(settings=None):
 
     @app.get("/health")
     def health():
-        ready=settings.model.exists()
-        return {"status":"ok", "engine":settings.engine, "model_present":ready, "demo_only":settings.engine=="demo"}
+        check=readiness.snapshot()
+        return {"status":"ok", "engine":settings.engine, "model_present":settings.model.exists(),
+                "demo_only":settings.engine=="demo", "ready":check['ready'], "readiness":check,
+                **jobs.maintenance_info()}
+
+    @app.get("/ready")
+    def ready():
+        value=health()
+        return JSONResponse(value,status_code=200 if value['ready'] else 503)
 
     @app.post("/api/v1/analyze", status_code=202, dependencies=[Depends(authenticate)])
     async def submit(file: UploadFile = File(...)):
         if Path(file.filename or "").suffix.lower() not in {".mov",".mp4"}:
             await file.close()
             raise HTTPException(415, "Upload a MOV or MP4 video")
-        if not settings.model.exists():
+        check=readiness.snapshot()
+        if not check['ready']:
             await file.close()
-            raise HTTPException(503, "Model missing; complete model setup first")
+            raise HTTPException(503, check['message'])
         if not jobs.slot.acquire(blocking=False):
             await file.close()
             raise HTTPException(429, "One video is already processing; retry shortly", headers={"Retry-After":"5"})
         jid=uuid.uuid4().hex[:16]
         folder=settings.runtime/jid
-        folder.mkdir()
         video=folder/("input"+Path(file.filename).suffix.lower())
         handed_off=False
         try:
+            folder.mkdir()
             total=0
             with video.open("wb") as out:
                 while chunk := await file.read(1024*1024):
@@ -131,19 +232,23 @@ def create_app(settings=None):
             if total == 0:
                 raise HTTPException(400,"Video is empty")
             jobs.save(jid,{"job_id":jid,"status":"processing","progress":1,"stage":"Starting local analysis"})
-            threading.Thread(target=jobs.run,args=(jid,video),daemon=True).start()
+            jobs.launch(jid,video)
             handed_off=True
             return {"job_id":jid,"status":"processing"}
         finally:
-            await file.close()
-            if not handed_off:
-                video.unlink(missing_ok=True)
-                jobs.slot.release()
+            try:
+                await file.close()
+            finally:
+                if not handed_off:
+                    try:
+                        jobs.cleanup(jid)
+                    finally:
+                        jobs.slot.release()
 
     @app.get("/api/v1/jobs/{job_id}",dependencies=[Depends(authenticate)])
     def status(job_id: str):
         # Only opaque IDs are accepted. Never interpret a user-supplied path.
-        if len(job_id)!=16 or any(c not in "0123456789abcdef" for c in job_id):
+        if not valid_job_id(job_id):
             raise HTTPException(404,"Job not found")
         return jobs.get(job_id)
 

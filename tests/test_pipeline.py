@@ -81,7 +81,7 @@ def test_timeout_releases_slot(settings):
 
 def test_restart_marks_interrupted_jobs(settings):
     jobs=Jobs(settings);jobs.save('a'*16,{'job_id':'a'*16,'status':'processing'})
-    fresh=Jobs(settings);assert fresh.get('a'*16)['status']=='failed'
+    fresh=Jobs(settings);fresh.recover();assert fresh.get('a'*16)['status']=='failed'
 
 def test_no_demo_model_in_competition(settings,tmp_path):
     video=tmp_path/'x.mov';clip(video,[])

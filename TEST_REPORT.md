@@ -1,6 +1,29 @@
 # Verification report
 
-Verified on 17 October 2026 in a Windows/Python 3.11 virtual environment. The authoring machine has an MX250 2 GB; it is not the team's RTX 4060 host. No event dataset was supplied here.
+Verified on 17 October 2026 in a Windows/Python 3.11 virtual environment. The authoring machine has an MX250 2 GB; it is not the team's RTX 4060 host. The event dataset was downloaded later in this session and used only for local processing with aggregate diagnostics.
+
+## Latest backend verification — 17 October 2026
+
+**81 Python/API tests passed in 109.49 seconds**, with one existing Starlette/HTTPX deprecation warning. **11 frontend behavior tests** and JavaScript syntax passed. The new PowerShell launcher parsed successfully and was used to start the isolated demo service.
+
+New checks cover actual synthetic model startup, corrupt/missing/demo/weak weights, invalid class mappings and non-finite scores; model replacement; bounded readiness timeout; recovery and orphan-file cleanup; a locked Windows upload file; worker launch failure; server shutdown; exclusive runtime ownership; and worker exit after the parent pipe closes during a stalled synthetic inference call. An initial blocking stdin watcher conflicted with NumPy DLL initialization on Windows; non-blocking pipe observation resolved it, and the child-process tests now pass.
+
+Two local services are running: existing preview on port 8000 and isolated synthetic demo on 8001 with a separate key/runtime. Live HTTP acceptance on 8001 completed:
+
+| Synthetic fixture | Result | Events | Verified JPEGs | Upload-to-result seconds |
+|---|---|---:|---:|---:|
+| Normal | done / no_violation | 0 | 0 | 1.312 |
+| Event | done / violation | 1 | 3 | 1.485 |
+| Multiple | done / violation | 2 | 6 | 1.265 |
+| Corrupt file | failed / no verdict | — | 0 | 0.953 |
+
+Unauthenticated calls and the other service's key were rejected; uploaded temporary files were removed. A separate two-event smoke upload to port 8000 completed in 2.47 seconds. These are small synthetic functional fixtures, not real-model performance measurements.
+
+Cloudflare 2026.5.2 created temporary hostnames, but this network did not establish the edge connection: QUIC timed out and HTTP/2 TLS on port 7844 was forcibly closed. Public readiness failed. **No working public endpoint or public upload success is claimed.** Retry on an allowed working network or Ratmir's host; an independent-network end-to-end check remains required.
+
+The earlier weak CPU validation was reproduced after the UTF-8 path fix: seven unique validation videos, TP=3, TN=1, FP=3, FN=0, F1=0.667. Three of four normal videos were false positives. Cold Python-process times for a 142.533-second train clip were 17.866 / 12.986 / 11.940 seconds on this laptop, excluding API/upload. The held-out test remains untouched. This model is not accepted as a semantic detector by the API.
+
+The following sections retain earlier integration history; their counts/timings describe those runs, not the current full suite.
 
 ## Executed checks
 
@@ -37,7 +60,7 @@ After the fix, **65 Python/API tests passed in 77.85 seconds**, with one existin
 
 ## Not verified
 
-- Detection quality, label coverage or confusion counts on ForteBank event videos.
+- Semantic detection quality, reviewed event-label coverage, localization and held-out test results on ForteBank videos. Weak binary validation above does not establish these.
 - Qwen weight download/import/inference, GPU VRAM use and latency on the team's RTX 4060.
 - Public URL, remote jury access, actual harness concurrency, or public upload timing.
 - Docker build/run, actual H.264/HEVC MOV variants, variable-frame-rate/rotation behavior, or actual new-angle generalization.

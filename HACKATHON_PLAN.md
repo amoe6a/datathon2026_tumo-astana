@@ -40,7 +40,7 @@ Detection, localization and classification account for 55 points. A beautiful in
 
 ## The MVP boundary
 
-Included now: simple responsive UI, authenticated asynchronous API, processing progress, local video decoding, multiple-event grouping, real JPEG evidence, curated sources, a real trainable linear baseline, an offline Qwen adapter, synthetic fixtures, API tests and evaluation tooling. No bank footage has been analyzed here. The GPU adapter and public deployment remain to be tested on your actual host.
+Included now: responsive UI, authenticated asynchronous API, processing progress, local video decoding, multiple-event grouping, JPEG evidence, curated sources, a trainable linear baseline, an offline Qwen adapter, synthetic fixtures, model readiness checks, worker recovery and evaluation tooling. The downloaded dataset has been used locally for weak binary CPU validation; it is not a validated semantic detector. GPU inference and a real-data public API remain to be tested on the RTX host. See `docs/backend-handoff.md` and `TEST_REPORT.md` for current checks.
 
 First competition MVP: reproduce this flow on at least one real positive and one real negative video, covering the major visible categories found in the training set. Submit only a detector that you have evaluated. Freeze the API schema before teammates branch. Do not add logins, chat, dashboards, account roles, OCR of IDs, face tracking, batch jobs or a vector database before this gate.
 

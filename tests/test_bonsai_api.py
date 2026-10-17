@@ -13,11 +13,14 @@ from scripts.make_demo import clip
 
 @pytest.mark.parametrize('rule_id,status',[('cashier_leaves','done'),('invented','failed')])
 def test_bonsai_worker_http_and_evidence(tmp_path,rule_id,status):
+    calls = 0
     class Handler(BaseHTTPRequestHandler):
         def do_POST(self):
+            nonlocal calls
+            calls += 1
             body=json.loads(self.rfile.read(int(self.headers['Content-Length'])))
             assert body['messages'][0]['content'][-1]['image_url']['url'].startswith('data:image/jpeg;base64,')
-            content=json.dumps({'events':[{'rule_id':rule_id,'timecode_sec':2.,
+            content=json.dumps({'events':[{'rule_id':'cashier_leaves' if calls == 1 else rule_id,'timecode_sec':2.,
                 'observation':'Synthetic stub response, not a banking accuracy result.'}],'uncertain':False})
             result=json.dumps({'choices':[{'finish_reason':'stop','message':{'content':content}}]}).encode()
             self.send_response(200);self.send_header('Content-Type','application/json')

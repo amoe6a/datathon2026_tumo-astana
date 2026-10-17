@@ -123,7 +123,7 @@
       const result = await request("/health", {}, 6000);
       if (result.status !== "ok") throw new Error("Health status is not ok");
       state.demo = result.demo_only === true;
-      state.modelReady = result.model_present === true;
+      state.modelReady = result.ready === true;
       $("serviceStatus").dataset.state = state.modelReady ? "ready" : "error";
       $("serviceStatus").lastElementChild.textContent = !state.modelReady ? "Модель не настроена" : state.demo ? "Сервис доступен · демо" : "Сервис доступен";
       $("demoNotice").hidden = !state.demo;

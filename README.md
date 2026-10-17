@@ -2,12 +2,14 @@
 
 A local video-review application for the ForteBank Datathon case. Upload a MOV file, poll the authenticated API, then inspect possible events with source frames, timestamps and a curated rule reference.
 
-**Status:** the software includes a working synthetic end-to-end demonstration and a trainable CPU baseline. The Qwen GPU adapter is implemented but has not been executed on your RTX 4060. Event videos have not been provided in this workspace, so real detection accuracy, actual event coverage, GPU memory use and the five-minute limit on event data remain unmeasured. This is a runnable starting point, not a submission-ready trained detector.
+**Status:** the software includes a working synthetic end-to-end demonstration and a trainable CPU baseline. The downloaded dataset has been used locally for a weak binary CPU validation experiment: TP=3, TN=1, FP=3, FN=0 on seven unique validation videos. These experimental weights are rejected by the review API. Ratmir's real model is not ready; semantic detection quality, GPU memory use and the five-minute public API limit on real data remain unverified. See the backend handoff for readiness, recovery and deployment work.
 
 ## Team resources
 
 - [Hackathon plan and balanced 12-hour schedule](HACKATHON_PLAN.md)
 - [Backend and deployment instructions](team/YOU_BACKEND.md)
+- [Backend implementation and deployment handoff](docs/backend-handoff.md)
+- [Ratmir: connect the prepared model to the backend](team/RATMIR_BACKEND_INTEGRATION.md)
 - [Ratmir: ML and evaluation instructions](team/RATMIR_ML.md)
 - [Amir: frontend and presentation instructions](team/AMIR_FRONTEND.md)
 - [Download the complete team kit ZIP](https://github.com/amoe6a/datathon2026_tumo-astana/raw/refs/heads/main/team-kit/forte-review-team-kit.zip)
@@ -16,7 +18,7 @@ A local video-review application for the ForteBank Datathon case. Upload a MOV f
 - [Ratmir: ML handoff, measurements and remaining work](docs/ml-handoff.md)
 - [ML labeling guide](docs/ml-labeling.md)
 
-Clone this repository to work together, or download the ZIP for a standalone copy. The ZIP was refreshed on 17 October 2026 after integrating Amir's frontend, Ratmir's ML tools and the larger, faster orbital animation. It includes generated synthetic test clips; the repository contains their generator. Real event videos, runtime evidence and credentials are not included. Use Git to receive later team changes.
+Clone this repository to work together, or download the ZIP for a standalone copy. The ZIP was refreshed on 17 October 2026 after frontend/ML integration and backend readiness/recovery fixes. It includes generated synthetic test clips; the repository contains their generator. Real event videos, runtime evidence and credentials are not included. Use Git to receive later team changes.
 
 ![Forte Review interface](docs/frontend-preview/desktop.jpg)
 
@@ -92,13 +94,15 @@ curl.exe http://127.0.0.1:8000/api/v1/jobs/REPLACE_WITH_JOB_ID -H "X-API-Key: $e
 .venv\Scripts\python.exe -m scripts.smoke_api data/demo/multiple.mov
 ```
 
-One job at a time prevents GPU overload; a second submission gets HTTP 429 with `Retry-After`. Ask the organizers whether their harness retries 429 or sends concurrent videos. If concurrency is required, you own adding tested capacity or queueing with a deadline measured from acceptance. Never silently queue jobs beyond the five-minute budget. Run **one** Uvicorn worker; the in-process admission guard is not shared across multiple server processes.
+One job at a time prevents GPU overload; a second submission gets HTTP 429 with `Retry-After`. Ask the organizers whether their harness retries 429 or sends concurrent videos. If concurrency is required, you own adding tested capacity or queueing with a deadline measured from acceptance. Never silently queue jobs beyond the five-minute budget. Run **one** Uvicorn worker; an exclusive runtime lock rejects a second server using the same storage.
+
+`GET /health` reports server liveness. `GET /ready` returns 200 only after the model loads and completes synthetic inference, otherwise 503; authenticated uploads also return 503 when not ready. Model/catalog changes require restart. Startup checks take up to `FORTE_READINESS_TIMEOUT` (90 seconds by default, maximum 120). Readiness proves that the engine runs, not detection quality.
 
 Limits: 64 MB upload, 180 seconds, at most 4K resolution, 270-second worker timeout. Case videos are stated as about 29 MB and 10–145 seconds. Errors are `failed`, never `no_violation`. The binary verdict has no third `insufficient_data` option; uncertainty is attached as a review warning. A warning is not a substitute for a usable detector.
 
 ## Deployment and offline operation
 
-Serve UI and API from the same machine. On the RTX laptop, a practical prototype route is a Cloudflare Tunnel pointing at `http://127.0.0.1:8000`. `cloudflared tunnel --url http://127.0.0.1:8000` prints a temporary HTTPS URL. A named tunnel is preferable for a stable address. A tunnel transports uploaded data; it is not an AI service. Confirm the organizer's interpretation of allowed network transport/hosting. If transport through third parties is disallowed, use a permitted directly reachable host and HTTPS reverse proxy instead. No tunnel was created or public URL registered in this delivery.
+Serve UI and API from the same machine. The team owner confirmed that organizers allow Cloudflare Tunnel. `cloudflared tunnel --url http://127.0.0.1:8000` prints a temporary HTTPS URL; use `--protocol http2` if UDP/QUIC cannot connect. A named tunnel is preferable for a stable address. A tunnel transports uploaded data; it is not an AI service. Keep the synthetic demo on its own port/runtime/key. See [backend handoff](docs/backend-handoff.md) for startup and actual verification status.
 
 Keep the laptop plugged in, disable sleep through the normal settings, use a stable network, and test from another connection. Do not add a login screen ahead of the jury API. Provide the URL and key privately. Quick tunnels have no availability guarantee and the URL changes when recreated. Test the public endpoint at least twice before the deadline.
 
@@ -115,11 +119,11 @@ For the offline test, download dependencies and weights first, disconnect intern
 
 With Node.js installed, run `node --check web/app.js` and `node --test tests/frontend.test.cjs` for the frontend checks. Node.js is only needed for these checks, not to run the application.
 
-Raw uploads are deleted after each job. Evidence and metadata stay in `runtime/jobs.sqlite3` for review and are protected by the API key. Stop the server and delete your task's runtime/data directories after the event according to its retention rules. They are ignored by Git; do not commit them. There is no automatic retention timer yet. API access control uses a single shared jury key, not per-user authorization. There is no face identification, audio analysis, external font/CDN request or model telemetry in the application code.
+Raw uploads are deleted after each job; temporary file locks trigger retries every five seconds and are visible in `/health.cleanup_pending_files`. Restart also cleans interrupted uploads, marks interrupted jobs failed and retains completed results. Evidence and metadata stay in the selected runtime's `jobs.sqlite3` for review and are protected by the API key. Stop the server and delete your task's runtime/data directories after the event according to its retention rules. They are ignored by Git; do not commit them. There is no automatic evidence-retention timer yet. API access control uses a single shared jury key, not per-user authorization. There is no face identification, audio analysis, external font/CDN request or model telemetry in the application code.
 
 ## Known limitations
 
-- The real detector is not evaluated until event data is downloaded and labeled. The enabled starting categories are hypotheses about dataset relevance.
+- Semantic event detection remains unvalidated. The weak binary CPU experiment is documented separately and cannot establish event types or source applicability. The enabled starting categories remain hypotheses about dataset relevance.
 - Two enabled event types are not an exhaustive taxonomy. New types can be missed. Extend the catalog only after checking visible evidence and a public RK rule.
 - Sparse frames can miss brief actions. Absence-based rules are disabled until full action visibility and temporal coverage are demonstrated.
 - A VLM can still misdescribe a frame. Schema validation prevents invented rule IDs, not visual hallucination. Human review remains necessary.

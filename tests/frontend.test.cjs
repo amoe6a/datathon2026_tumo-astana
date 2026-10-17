@@ -61,7 +61,7 @@ function setup(route = () => ({})) {
     File: class { constructor(parts, name) { this.name = name; this.size = parts.reduce((sum, p) => sum + (p.size || 1), 0); } },
     fetch: async (url, options) => {
       requests.push({ url, options });
-      const value = url === '/health' ? { status: 'ok', model_present: true, demo_only: true } : await route(url, options);
+      const value = url === '/health' ? { status: 'ok', model_present: true, ready: true, demo_only: true } : await route(url, options);
       if (value instanceof Error) throw value;
       const status = value?.httpStatus || 200;
       return { ok: status < 400, status, headers: { get: () => value?.retryAfter || null },

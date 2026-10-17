@@ -27,6 +27,8 @@ def test_status_survives_locked_progress_and_recovers(tmp_path, monkeypatch):
         return read_text(path, *args, **kwargs)
 
     with TestClient(app) as client:
+        app.state.jobs.save(job_id, payload)
+        progress.write_text(json.dumps({'progress': 70, 'stage': 'Analyzing visible actions'}))
         monkeypatch.setattr(Path, 'read_text', locked_read)
         response = client.get(f'/api/v1/jobs/{job_id}', headers={'X-API-Key': key})
         assert response.status_code == 200
