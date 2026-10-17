@@ -22,7 +22,7 @@ from scripts.evaluate import metrics
 def freeze_split(rows, path):
     label_hash=source_label_digest(rows)
     if path.exists():
-        frozen = json.loads(path.read_text())
+        frozen = json.loads(path.read_text(encoding='utf-8'))
         if frozen['dataset_hashes'] != [r['sha256'] for r in rows]:
             raise ValueError('Frozen split belongs to another dataset')
         if frozen.get('source_labels_sha256',label_hash)!=label_hash:
@@ -46,7 +46,7 @@ def freeze_split(rows, path):
 
 def prepare_cache(manifest, output):
     path = Path(manifest)
-    rows = json.loads(path.read_text())['videos']
+    rows = json.loads(path.read_text(encoding='utf-8'))['videos']
     cache = output/'features';cache.mkdir(exist_ok=True)
     for index, row in enumerate(rows):
         target = cache/f'{index:02}.npz'
@@ -127,7 +127,7 @@ def main():
     if (output/'final-test.started').exists() and not a.final_test:
         raise ValueError('Candidate is frozen after final test; do not tune it using test results')
     if a.final_test:
-        config=json.loads((output/'selected.json').read_text())
+        config=json.loads((output/'selected.json').read_text(encoding='utf-8'))
         lock=output/'final-test.started'
         with lock.open('x') as stream:stream.write(sha256(output/'selected.json'))
         with np.load(output/'selected.npz') as artifact:

@@ -13,8 +13,8 @@ from scripts.evaluate import metrics
 
 
 def evaluate_source(manifest,split_file,predictions,split):
-    path=Path(manifest);rows=json.loads(path.read_text())['videos']
-    frozen=json.loads(Path(split_file).read_text())
+    path=Path(manifest);rows=json.loads(path.read_text(encoding='utf-8'))['videos']
+    frozen=json.loads(Path(split_file).read_text(encoding='utf-8'))
     if frozen['dataset_hashes']!=[r['sha256'] for r in rows]:raise ValueError('Frozen split mismatch')
     if 'source_labels_sha256' in frozen and frozen['source_labels_sha256']!=source_label_digest(rows):
         raise ValueError('Organizer labels changed after split freeze')
@@ -29,7 +29,7 @@ def evaluate_source(manifest,split_file,predictions,split):
         if sp!=split:continue
         groups[digest].append(index)
         target=Path(predictions)/f'{index:02d}.json'
-        result=json.loads(target.read_text()) if target.exists() else {'status':'failed','failure_reason':'missing_prediction'}
+        result=json.loads(target.read_text(encoding='utf-8')) if target.exists() else {'status':'failed','failure_reason':'missing_prediction'}
         if target.exists() and result.get('video_sha256')!=row['sha256']:raise ValueError('Prediction hash mismatch')
         if result.get('signature'):signatures.add(result['signature'])
         if len(signatures)>1:raise ValueError('Mixed inference configurations')
@@ -92,7 +92,7 @@ if __name__=='__main__':
         with out.with_suffix('.started').open('x') as stream:stream.write(sha256(a.frozen_config))
     report=evaluate_source(a.manifest,a.split_file,a.predictions,a.split)
     if a.split=='test':
-        selected=json.loads(Path(a.frozen_config).read_text())
+        selected=json.loads(Path(a.frozen_config).read_text(encoding='utf-8'))
         if report['inference_signatures']!=[selected.get('inference_signature')]:
             raise ValueError('Final test predictions do not match frozen configuration')
     out.write_text(json.dumps(report,indent=2));print(json.dumps(report,indent=2))

@@ -231,6 +231,45 @@ def test_weak_weights_cannot_serve_api_verdicts(tmp_path):
         reference_scores([],target,False)
 
 
+def test_utf8_video_paths_with_non_utf8_system_locale(tmp_path, monkeypatch):
+    import cv2
+    from ml.manifest import sha256
+    from scripts.weak_baseline import prepare_cache
+    from scripts.evaluate_source_labels import evaluate_source
+
+    video = tmp_path / 'синтетическая_запись.mov'
+    writer = cv2.VideoWriter(str(video), cv2.VideoWriter_fourcc(*'mp4v'), 10, (32, 24))
+    assert writer.isOpened()
+    try:
+        for _ in range(10):
+            writer.write(np.zeros((24, 32, 3), dtype=np.uint8))
+    finally:
+        writer.release()
+    row = {'path': video.name, 'sha256': sha256(video),
+           'source': {'binary_label': 0, 'timestamp_sec': None}}
+    manifest = tmp_path / 'manifest.json'
+    manifest.write_text(json.dumps({'videos': [row]}, ensure_ascii=False), encoding='utf-8')
+    split = tmp_path / 'split.json'
+    split.write_text(json.dumps({'dataset_hashes': [row['sha256']], 'splits': ['val']}), encoding='utf-8')
+    predictions = tmp_path / 'predictions'
+    predictions.mkdir()
+    (predictions / '00.json').write_text(json.dumps({
+        'status': 'done', 'video_sha256': row['sha256'], 'events': []}), encoding='utf-8')
+
+    # Reproduce a Windows cp1251 default even when this test runs on Linux.
+    original_read = Path.read_text
+    def locale_read(path, encoding=None, errors=None):
+        return original_read(path, encoding=encoding or 'cp1251', errors=errors)
+    monkeypatch.setattr(Path, 'read_text', locale_read)
+
+    rows, cache = prepare_cache(manifest, tmp_path)
+    assert rows[0]['path'] == video.name
+    assert (cache / '00.npz').is_file()
+    report = evaluate_source(manifest, split, predictions, 'val')
+    assert report['video_counts'] == {'tp': 0, 'tn': 1, 'fp': 0, 'fn': 0}
+    assert report['processing_success_rate'] == 1
+
+
 def test_source_primary_metrics_deduplicate_files_and_retain_anchors(tmp_path):
     from ml.manifest import sha256
     from scripts.evaluate_source_labels import evaluate_source
