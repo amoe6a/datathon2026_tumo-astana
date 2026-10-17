@@ -71,16 +71,37 @@
 .planet-five {
   --planet-size: 18px;
   --orbit-radius: 429.5px;
-  --start-angle: 50deg;
+  --start-angle: 110deg;
   --orbit-period: 44s;
   background: linear-gradient(130deg, #f4c8e6, #885a91 70%);
 }
 .planet-six {
   --planet-size: 20px;
   --orbit-radius: 319.5px;
-  --start-angle: 145deg;
+  --start-angle: 85deg;
   --orbit-period: 34s;
   background: linear-gradient(130deg, #e1d1ff, #8061a5 70%);
+}
+.planet-seven {
+  --planet-size: 18px;
+  --orbit-radius: 539.5px;
+  --start-angle: -4deg;
+  --orbit-period: 38s;
+  background: linear-gradient(130deg, #c6eadf, #5b8f85 70%);
+}
+.planet-eight {
+  --planet-size: 22px;
+  --orbit-radius: 429.5px;
+  --start-angle: -10deg;
+  --orbit-period: 44s;
+  background: linear-gradient(130deg, #ffd0da, #a65d7b 70%);
+}
+.planet-nine {
+  --planet-size: 12px;
+  --orbit-radius: 319.5px;
+  --start-angle: 205deg;
+  --orbit-period: 34s;
+  background: linear-gradient(130deg, #f5ddb5, #93764f 70%);
 }
 @keyframes satellite-orbit {
   from { transform: rotate(var(--start-angle)) translateX(var(--orbit-radius)); }
