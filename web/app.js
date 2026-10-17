@@ -21,6 +21,25 @@
     return `${String(minutes).padStart(2, "0")}:${precise ? (remainder / 10).toFixed(1).padStart(4, "0") : String(remainder).padStart(2, "0")}`;
   }
   const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+  const motionPreference = matchMedia("(prefers-reduced-motion: reduce)");
+  let backgroundMoving = !motionPreference.matches;
+  let motionChosen = false;
+  function updateBackgroundMotion() {
+    $("backgroundOrbits").dataset.motion = backgroundMoving ? "running" : "paused";
+    $("motionToggle").hidden = false;
+    $("motionToggle").textContent = backgroundMoving ? "Пауза фона" : "Оживить фон";
+    $("motionToggle").setAttribute("aria-pressed", String(backgroundMoving));
+    $("motionToggle").setAttribute("aria-label", backgroundMoving ? "Остановить движение фоновых орбит" : "Включить движение фоновых орбит");
+  }
+  $("motionToggle").addEventListener("click", () => {
+    backgroundMoving = !backgroundMoving;
+    motionChosen = true;
+    updateBackgroundMotion();
+  });
+  motionPreference.addEventListener?.("change", event => {
+    if (!motionChosen) { backgroundMoving = !event.matches; updateBackgroundMotion(); }
+  });
+  updateBackgroundMotion();
   function scrollTo(element) {
     element.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
   }

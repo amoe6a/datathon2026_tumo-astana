@@ -19,12 +19,13 @@
   </header>
   <main class="page-frame">
     <section class="hero" aria-labelledby="heroTitle">
-      <div class="orbits" aria-hidden="true"><span></span><span></span><span></span><span></span><i class="planet planet-one"></i><i class="planet planet-two"></i><i class="planet planet-three"></i></div>
+      <div id="backgroundOrbits" class="orbits" aria-hidden="true"><span></span><span></span><span></span><span></span><i class="planet planet-one"></i><i class="planet planet-two"></i><i class="planet planet-three"></i></div>
       <div class="hero-content">
         <p class="eyebrow"><span class="spark" aria-hidden="true">✳</span> ВИДЕОАНАЛИТИКА КАССОВЫХ ОПЕРАЦИЙ</p>
         <h1 id="heroTitle">За каждым выводом —<br><span class="gradient-text">конкретный кадр.</span></h1>
         <p class="hero-description">AI находит моменты, требующие внимания.<br>Вы проверяете событие, доказательства и правило.</p>
         <a class="hero-link" href="#review">Начать проверку <span aria-hidden="true">↗</span></a>
+        <button id="motionToggle" class="motion-toggle" type="button" aria-pressed="false" aria-label="Включить движение фоновых орбит" hidden>Оживить фон</button>
       </div>
       <div class="workspace-wrap" id="review">
         <div class="workspace-shell">

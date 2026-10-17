@@ -17,3 +17,74 @@
 @media(max-width:780px){input[type=password]{font-size:16px}}
 @media(max-width:420px){h1{font-size:clamp(27px,7.6vw,32px)}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+/* Decorative satellites share the exact center and radius of the visible rings. */
+.orbits {
+  background: radial-gradient(ellipse at center, #6c31522b, transparent 61%);
+}
+.orbits > span {
+  border-color: #a68bc430;
+  box-shadow: 0 0 18px #a68bc405;
+}
+.planet {
+  left: 50%;
+  top: 50%;
+  right: auto;
+  margin-left: calc(var(--planet-size) / -2);
+  margin-top: calc(var(--planet-size) / -2);
+  width: var(--planet-size);
+  height: var(--planet-size);
+  transform-origin: center;
+  transform: rotate(var(--start-angle)) translateX(var(--orbit-radius));
+  animation: satellite-orbit var(--orbit-period) linear infinite;
+  box-shadow: inset -5px -5px 12px #0d0c1280, 0 0 22px #b9a1ee35;
+}
+.planet-one {
+  --planet-size: 28px;
+  --orbit-radius: 539.5px;
+  --start-angle: 176deg;
+  --orbit-period: 85s;
+  background: linear-gradient(130deg, #dec2ff, #594075 70%);
+}
+.planet-two {
+  --planet-size: 17px;
+  --orbit-radius: 649.5px;
+  --start-angle: -25deg;
+  --orbit-period: 120s;
+  animation-direction: reverse;
+  background: linear-gradient(130deg, #ffc0ad, #9e4864 70%);
+}
+.planet-three {
+  --planet-size: 8px;
+  --orbit-radius: 429.5px;
+  --start-angle: -130deg;
+  --orbit-period: 100s;
+  background: #f5a3b6;
+  box-shadow: 0 0 16px #fa8e9b55;
+}
+@keyframes satellite-orbit {
+  from { transform: rotate(var(--start-angle)) translateX(var(--orbit-radius)); }
+  to { transform: rotate(calc(var(--start-angle) + 360deg)) translateX(var(--orbit-radius)); }
+}
+.motion-toggle {
+  display: block;
+  margin: 10px auto -16px;
+  min-height: 32px;
+  padding: 4px 12px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--muted);
+  font: 11px var(--font);
+}
+.motion-toggle:hover { color: var(--ink); background: #ffffff06; }
+.orbits[data-motion="paused"] .planet { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .planet { animation: none; }
+  /* Only an explicit click may opt into background motion in reduced-motion mode. */
+  .orbits[data-motion] .planet {
+    animation: satellite-orbit var(--orbit-period) linear infinite !important;
+    animation-play-state: paused !important;
+  }
+  .orbits[data-motion="running"] .planet { animation-play-state: running !important; }
+  .orbits[data-motion] .planet-two { animation-direction: reverse !important; }
+}
