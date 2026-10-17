@@ -2,13 +2,14 @@
 
 A local video-review application for the ForteBank Datathon case. Upload a MOV file, poll the authenticated API, then inspect possible events with source frames, timestamps and a curated rule reference.
 
-**Status:** the software includes a working synthetic end-to-end demonstration and a trainable CPU baseline. The downloaded dataset has been used locally for a weak binary CPU validation experiment: TP=3, TN=1, FP=3, FN=0 on seven unique validation videos. These experimental weights are rejected by the review API. Ratmir's real model is not ready; semantic detection quality, GPU memory use and the five-minute public API limit on real data remain unverified. See the backend handoff for readiness, recovery and deployment work.
+**Status:** the backend and synthetic demo are deployed as private Linux user services on the RTX laptop. The native Bonsai engine is running and has completed real positive/negative train uploads through the API. Detection quality remains insufficient: its seven-video validation had TP=1, TN=3, FP=1, FN=2, F1=0.400. Weak binary CPU weights remain rejected by the review API. Public jury access is not yet verified. See the Linux deployment handoff and ML quality report for measured results and remaining gates.
 
 ## Team resources
 
 - [Hackathon plan and balanced 12-hour schedule](HACKATHON_PLAN.md)
 - [Backend and deployment instructions](team/YOU_BACKEND.md)
 - [Backend implementation and deployment handoff](docs/backend-handoff.md)
+- [Ratmir's managed Linux deployment, commands and limits](docs/linux-deployment.md)
 - [Ratmir: connect the prepared model to the backend](team/RATMIR_BACKEND_INTEGRATION.md)
 - [Ratmir: ML and evaluation instructions](team/RATMIR_ML.md)
 - [Amir: frontend and presentation instructions](team/AMIR_FRONTEND.md)
@@ -18,7 +19,7 @@ A local video-review application for the ForteBank Datathon case. Upload a MOV f
 - [Ratmir: ML handoff, measurements and remaining work](docs/ml-handoff.md)
 - [ML labeling guide](docs/ml-labeling.md)
 
-Clone this repository to work together, or download the ZIP for a standalone copy. The ZIP was refreshed on 17 October 2026 after frontend/ML integration and backend readiness/recovery fixes. It includes generated synthetic test clips; the repository contains their generator. Real event videos, runtime evidence and credentials are not included. Use Git to receive later team changes.
+Clone this repository to work together, or download the ZIP for a standalone copy. The ZIP was refreshed on 17 October 2026 after frontend/ML integration, backend recovery fixes and the managed Linux deployment. It includes generated synthetic test clips; the repository contains their generator. Real event videos, runtime evidence and credentials are not included. Use Git to receive later team changes.
 
 ![Forte Review interface](docs/frontend-preview/desktop.jpg)
 

@@ -2,7 +2,23 @@
 
 Verified on 17 October 2026 in a Windows/Python 3.11 virtual environment. The authoring machine has an MX250 2 GB; it is not the team's RTX 4060 host. The event dataset was downloaded later in this session and used only for local processing with aggregate diagnostics.
 
-## Latest backend verification — 17 October 2026
+## Linux deployment verification — 17 October 2026
+
+The integrated backend and Ratmir's Bonsai revision are running in a separate checkout on the RTX 4060 laptop as systemd user services. Demo, real API and native model have separate explicit roles; both API keys are private and isolated. The final application revision tested is `c52b80e`; documentation/report changes follow it.
+
+**87 Python/API tests passed in 25.88 seconds on Linux**, with the existing Starlette/HTTPX warning; **11 frontend checks** and syntax passed. The combined source had also passed 87 Python/API tests on Windows before the additional live native-availability assertions; those targeted assertions passed separately there.
+
+Live synthetic normal/event/multiple/corrupt uploads completed with the expected statuses, schema and valid JPEGs. Two real train uploads completed in 12.913 and 14.432 seconds, matching their organizer binary labels; the positive result had three decodable JPEGs. Two examples are a functional check, not an accuracy estimate.
+
+Three complete cold starts and API uploads of the longest 142.533-second train clip took **139.507 / 143.516 / 143.674 seconds**, including model/API startup and the startup inference probe. All completed within the 240-second internal target. OS disk cache was retained; no public-network timing is claimed.
+
+Native/API crash recovery, interrupted-job failure, completed-result persistence, temporary-upload removal and independent API keys were verified against the actual services. After closing both SSH sessions and logging in again, all three service PIDs were unchanged and both `/ready` endpoints returned 200.
+
+Both pinned GGUF hashes passed verification. Native GPU use was supported by a controlled active/stopped global CUDA memory difference of approximately 5.843 GiB. NVML still reports a driver/library mismatch, so this is not a measured native VRAM peak. GPU and system drivers were not changed. Model quality remains insufficient according to Ratmir's seven-video Bonsai validation (F1=0.400).
+
+Outbound certificate-verified TLS connections to both Cloudflare regions succeeded from the GPU host. Public startup was not moved to SSH to evade the earlier automatic approval rejection. **Public API and independent-network uploads remain unverified.** See [Linux deployment](docs/linux-deployment.md) and [aggregate evidence](reports/backend-deployment-20261017.json).
+
+## Windows backend verification — 17 October 2026
 
 **81 Python/API tests passed in 109.49 seconds**, with one existing Starlette/HTTPX deprecation warning. **11 frontend behavior tests** and JavaScript syntax passed. The new PowerShell launcher parsed successfully and was used to start the isolated demo service.
 

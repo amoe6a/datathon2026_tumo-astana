@@ -1,0 +1,368 @@
+{
+  "recorded_at_utc": "2026-10-17T13:32:23.710048+00:00",
+  "tested_code_revision": "c52b80e41d7e9b8606b6f57ef59be3cfe579a904",
+  "backend_deployed": true,
+  "public_api_verified": false,
+  "real_model_inference_verified": true,
+  "model_quality_accepted_for_competition": false,
+  "host": "cachyos",
+  "checkout": "/home/angel/forte-review-service",
+  "services": {
+    "forte-demo.service": {
+      "engine": "demo",
+      "host_local_url": "http://127.0.0.1:8001",
+      "key_file": "runtime/forte-demo/access-key.txt"
+    },
+    "forte-jury.service": {
+      "engine": "bonsai",
+      "host_local_url": "http://127.0.0.1:8000",
+      "key_file": "runtime/forte-jury/access-key.txt"
+    },
+    "forte-jury-model.service": {
+      "host_local_url": "http://127.0.0.1:18080",
+      "config": "configs/bonsai.json"
+    }
+  },
+  "environment": {
+    "hostname": "cachyos",
+    "core_python": "3.11.15",
+    "core_packages": {
+      "fastapi": "0.143.3",
+      "uvicorn": "0.54.0",
+      "numpy": "2.4.6",
+      "opencv-python-headless": "5.0.0.93",
+      "httpx": "0.28.1",
+      "scikit-learn": "1.9.1"
+    },
+    "cpu": "Intel(R) Core(TM) i9-14900HX",
+    "ram_total_kib": 32655672,
+    "weights": {
+      "repo": "prism-ml/Ternary-Bonsai-2-27B-gguf",
+      "revision": "b072e1d3b35a0a630cece372c2127528e0994386",
+      "files": [
+        {
+          "path": "Ternary-Bonsai-2-27B-PTQ1_0.gguf",
+          "bytes": 5946648928,
+          "sha256": "53107f530aa52eb00912263ab1ee29bd199261c87cd7b4ad4ca1318c1fe33ee3"
+        },
+        {
+          "path": "Ternary-Bonsai-2-27B-mmproj-Q8_0.gguf",
+          "bytes": 629246976,
+          "sha256": "6807ede61d570bb86ba34b756a0fa109edc33668604de867c6ea6d8f1d631903"
+        }
+      ],
+      "publisher_checksums_verified": true
+    },
+    "native_binary_sha256": "88280452e400d13c8cf7fd311bc796cc442775d03a44a74876e6b78338ec91ed",
+    "model_config_sha256": "b8702f4537ec7bfe3c7ac294cac0ddddc4eef6ecae8342a49b346b31ccbcfdd4",
+    "linger": "yes"
+  },
+  "synthetic_checks": [
+    {
+      "tag": "synthetic-normal",
+      "engine": "demo",
+      "status": "done",
+      "verdict": "no_violation",
+      "events": 0,
+      "jpeg_frames": 0,
+      "end_to_end_sec": 0.521,
+      "states": [
+        "processing",
+        "done"
+      ],
+      "authentication_checked": true,
+      "uploads_removed": true
+    },
+    {
+      "tag": "synthetic-event",
+      "engine": "demo",
+      "status": "done",
+      "verdict": "violation",
+      "events": 1,
+      "jpeg_frames": 3,
+      "end_to_end_sec": 0.548,
+      "states": [
+        "processing",
+        "done"
+      ],
+      "authentication_checked": true,
+      "uploads_removed": true
+    },
+    {
+      "tag": "synthetic-multiple",
+      "engine": "demo",
+      "status": "done",
+      "verdict": "violation",
+      "events": 2,
+      "jpeg_frames": 6,
+      "end_to_end_sec": 0.52,
+      "states": [
+        "processing",
+        "done"
+      ],
+      "authentication_checked": true,
+      "uploads_removed": true
+    },
+    {
+      "tag": "synthetic-corrupt",
+      "engine": "demo",
+      "status": "failed",
+      "verdict": null,
+      "events": 0,
+      "jpeg_frames": 0,
+      "end_to_end_sec": 0.265,
+      "states": [
+        "processing",
+        "failed"
+      ],
+      "authentication_checked": true,
+      "uploads_removed": true
+    }
+  ],
+  "real_train_smoke_checks": [
+    {
+      "tag": "real-train-binary-0",
+      "engine": "bonsai",
+      "status": "done",
+      "verdict": "no_violation",
+      "events": 0,
+      "jpeg_frames": 0,
+      "end_to_end_sec": 12.913,
+      "states": [
+        "processing",
+        "done"
+      ],
+      "authentication_checked": true,
+      "uploads_removed": true,
+      "duration_sec": 15.866667,
+      "organizer_binary": 0,
+      "matches_organizer_binary": true
+    },
+    {
+      "tag": "real-train-binary-1",
+      "engine": "bonsai",
+      "status": "done",
+      "verdict": "violation",
+      "events": 1,
+      "jpeg_frames": 3,
+      "end_to_end_sec": 14.432,
+      "states": [
+        "processing",
+        "done"
+      ],
+      "authentication_checked": true,
+      "uploads_removed": true,
+      "duration_sec": 14.7,
+      "organizer_binary": 1,
+      "matches_organizer_binary": true
+    }
+  ],
+  "longest_train_cold_runs": [
+    {
+      "tag": "longest-train-cold-1",
+      "engine": "bonsai",
+      "status": "done",
+      "verdict": "no_violation",
+      "events": 0,
+      "jpeg_frames": 0,
+      "end_to_end_sec": 133.716,
+      "states": [
+        "processing",
+        "done"
+      ],
+      "authentication_checked": true,
+      "uploads_removed": true,
+      "duration_sec": 142.533021,
+      "startup_sec": 5.77,
+      "cold_total_sec": 139.507,
+      "native_peak_rss_bytes": 6484344832,
+      "api_peak_rss_bytes": 97181696,
+      "native_peak_vram_bytes": null,
+      "vram_note": "NVML driver/library mismatch; no native VRAM peak claimed",
+      "disk_cache_cleared": false
+    },
+    {
+      "tag": "longest-train-cold-2",
+      "engine": "bonsai",
+      "status": "done",
+      "verdict": "no_violation",
+      "events": 0,
+      "jpeg_frames": 0,
+      "end_to_end_sec": 137.242,
+      "states": [
+        "processing",
+        "done"
+      ],
+      "authentication_checked": true,
+      "uploads_removed": true,
+      "duration_sec": 142.533021,
+      "startup_sec": 6.251,
+      "cold_total_sec": 143.516,
+      "native_peak_rss_bytes": 6483189760,
+      "api_peak_rss_bytes": 98639872,
+      "native_peak_vram_bytes": null,
+      "vram_note": "NVML driver/library mismatch; no native VRAM peak claimed",
+      "disk_cache_cleared": false
+    },
+    {
+      "tag": "longest-train-cold-3",
+      "engine": "bonsai",
+      "status": "done",
+      "verdict": "no_violation",
+      "events": 0,
+      "jpeg_frames": 0,
+      "end_to_end_sec": 136.254,
+      "states": [
+        "processing",
+        "done"
+      ],
+      "authentication_checked": true,
+      "uploads_removed": true,
+      "duration_sec": 142.533021,
+      "startup_sec": 7.399,
+      "cold_total_sec": 143.674,
+      "native_peak_rss_bytes": 6483234816,
+      "api_peak_rss_bytes": 98267136,
+      "native_peak_vram_bytes": null,
+      "vram_note": "NVML driver/library mismatch; no native VRAM peak claimed",
+      "disk_cache_cleared": false
+    }
+  ],
+  "gpu_residency_check": {
+    "device": "CUDA device 0",
+    "total_device_bytes": 8245805056,
+    "free_with_native_model": 98959360,
+    "free_without_native_model": 6372720640,
+    "approximate_resident_difference_bytes": 6273761280,
+    "gpu_residency_consistent_with_offload": true,
+    "measurement_kind": "Controlled active/stopped global CUDA memory snapshots; not a per-process VRAM peak",
+    "api_ready_after_restore": true
+  },
+  "recovery_and_tests": {
+    "python_tests": {
+      "exit": 0,
+      "passed": 87,
+      "seconds": 25.88
+    },
+    "frontend_tests": {
+      "exit": 0,
+      "passed": 11
+    },
+    "native_crash_recovery": {
+      "unavailable_http": 503,
+      "recovered_http": 200,
+      "pid_changed": true,
+      "recovery_wait_sec": 5.703
+    },
+    "post_native_recovery_upload": {
+      "tag": "post-recovery-real-train",
+      "engine": "bonsai",
+      "status": "done",
+      "verdict": "no_violation",
+      "events": 0,
+      "jpeg_frames": 0,
+      "end_to_end_sec": 13.16,
+      "states": [
+        "processing",
+        "done"
+      ],
+      "authentication_checked": true,
+      "uploads_removed": true
+    },
+    "api_crash_recovery": {
+      "interrupted_job": "failed",
+      "pid_changed": true,
+      "previous_completed_results_preserved": true,
+      "interrupted_upload_removed": true,
+      "keys_isolated": true
+    },
+    "post_api_recovery_upload": {
+      "tag": "post-recovery-synthetic-normal",
+      "engine": "demo",
+      "status": "done",
+      "verdict": "no_violation",
+      "events": 0,
+      "jpeg_frames": 0,
+      "end_to_end_sec": 0.52,
+      "states": [
+        "processing",
+        "done"
+      ],
+      "authentication_checked": true,
+      "uploads_removed": true
+    },
+    "services": {
+      "forte-demo.service": {
+        "pid": 2056821,
+        "ready_http": 200
+      },
+      "forte-jury.service": {
+        "pid": 2035130,
+        "ready_http": 200
+      }
+    },
+    "tested_code_revision": "c52b80e41d7e9b8606b6f57ef59be3cfe579a904"
+  },
+  "ssh_logout_persistence": {
+    "verified_after_new_ssh_login": true,
+    "elapsed_since_logout_sec": 32.01,
+    "services": {
+      "forte-demo.service": {
+        "pid_unchanged": true,
+        "active": true
+      },
+      "forte-jury.service": {
+        "pid_unchanged": true,
+        "active": true
+      },
+      "forte-jury-model.service": {
+        "pid_unchanged": true,
+        "active": true
+      }
+    },
+    "ready_http": {
+      "8000": 200,
+      "8001": 200
+    }
+  },
+  "original_checkouts_preserved": {
+    "datathon2026_tumo-astana": {
+      "head": "56eb7e9",
+      "status": "?? ML_PLAN.md"
+    },
+    "datathon2026_tumo-astana-ml": {
+      "head": "9717111",
+      "status": ""
+    }
+  },
+  "public_access": {
+    "url": null,
+    "outbound_checks_from_gpu_host": {
+      "outbound_only": true,
+      "public_tunnel_started": false,
+      "checks": [
+        {
+          "host": "region1.v2.argotunnel.com",
+          "port": 7844,
+          "tls_verified": true,
+          "tls": "TLSv1.3"
+        },
+        {
+          "host": "region2.v2.argotunnel.com",
+          "port": 7844,
+          "tls_verified": true,
+          "tls": "TLSv1.3"
+        }
+      ]
+    },
+    "independent_network_upload_tested": false,
+    "blocker": "Earlier automatic approval review rejected Cloudflare Tunnel startup with blocked by policy; no specific reason was provided. The denied publication action was not moved to SSH or another tool."
+  },
+  "limits": [
+    "Real train smoke checks establish operation, not semantic detection accuracy.",
+    "The held-out test was not read or rerun during deployment; Ratmir had already used it in his earlier frozen CPU experiment.",
+    "No native per-process VRAM peak was measured because NVML reports a driver/library mismatch. The controlled CUDA memory difference is a separate approximate residency measurement.",
+    "Cold runs start new model and API processes, including the startup probe; OS disk cache was not cleared.",
+    "All live upload tests here used the GPU host loopback; public HTTPS and independent-network uploads remain unverified."
+  ]
+}
