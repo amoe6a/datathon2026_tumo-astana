@@ -59,7 +59,7 @@ def install(args):
         if not args.config or not args.native_binary:
             raise ValueError('Bonsai requires --config and --native-binary')
         config = Path(args.config).resolve()
-        native = native_command(config, args.native_binary)
+        native = native_command(config, args.native_binary) + ['--log-disable']
         env['FORTE_MODEL'] = str(config)
         api = [str(python), '-m', 'scripts.serve_bonsai', '--config', str(config),
                '--runtime', str(runtime), '--port', str(args.port)]
