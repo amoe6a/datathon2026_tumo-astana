@@ -68,7 +68,7 @@ def install(args):
                 [python, '-m', 'scripts.wait_native', '--config', config]) + '\n'
         units[native_name] = HEADER + (
             '[Unit]\nDescription=Forte Review local Bonsai model\n'
-            '[Service]\nType=exec\nWorkingDirectory=' + quoted(ROOT) + '\n'
+            '[Service]\nType=exec\nWorkingDirectory=' + str(ROOT).replace('%', '%%') + '\n'
             'ExecStart=' + ' '.join(quoted(v) for v in native) + '\n'
             'Restart=on-failure\nRestartSec=3\nTimeoutStopSec=20\n'
             'KillMode=control-group\nUMask=0077\n'
@@ -81,7 +81,7 @@ def install(args):
     env_path.chmod(0o600)
     units[api_name] = HEADER + (
         '[Unit]\nDescription=Forte Review ' + args.engine + ' API\n' + dependencies +
-        '[Service]\nType=exec\nWorkingDirectory=' + quoted(ROOT) + '\n'
+        '[Service]\nType=exec\nWorkingDirectory=' + str(ROOT).replace('%', '%%') + '\n'
         'EnvironmentFile=' + quoted(env_path) + '\n' + pre +
         'ExecStart=' + ' '.join(quoted(v) for v in api) + '\n'
         'Restart=on-failure\nRestartSec=3\nTimeoutStartSec=200\nTimeoutStopSec=20\n'
