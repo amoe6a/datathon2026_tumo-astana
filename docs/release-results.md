@@ -1,5 +1,7 @@
 # Qwen release evidence — 18 October 2026
 
+**Later pre-submission check:** [the 18 October upgrade audit](qwen-upgrade-20261018.md) retained this detector, recovered cached failed readiness, and measured a fresh public longest-training-MOV upload at 97.222 seconds. It separately reports revised annotations and a rejected updated-2B run; the historical measurements below remain unchanged. The discovered 8B GGUF was not visually evaluated or deployed.
+
 The selected detector is **Qwen3-VL-2B-Instruct with the fourth-epoch scene LoRA, BF16 inference and denser full-clip verification**. Configuration: `configs/qwen-release.json`. Inference source was frozen at `51a54a052a2ea43b455f5ef93e7a5e4ade8e6ef7`; later report and packaging commits do not change the detector.
 
 The public UI/API is **https://fracture-freestyle-unvalued.ngrok-free.dev**. [Judge access and recovery](judges-handoff.md), [Linux deployment](linux-deployment.md), [short pitch](pitch.md).

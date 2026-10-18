@@ -6,6 +6,8 @@ A local video-review application for the ForteBank Datathon case. Upload a MOV f
 
 ## Final measured release
 
+**18 October pre-submission upgrade check:** the newly downloaded 8B GGUF lacks a discovered matching vision projector and was not visually evaluated. The completed updated-annotation 2B adapter regressed on the same validation videos (F1 0.444 versus 0.667), so the published 2B release remains selected. The unchanged service was recovered and the longest real training MOV passed public HTTPS in 97.222 seconds. See [upgrade decision and recovery evidence](docs/qwen-upgrade-20261018.md) and [aggregate report](reports/qwen-upgrade-20261018.json).
+
 Selected: **Qwen3-VL-2B-Instruct, four-epoch scene LoRA, BF16 inference and denser verification**, frozen in `configs/qwen-release.json`. Training used only 26 manually annotated training videos. A matched BF16 base-model control scored F1 0 on validation; the selected adapter scored 0.667.
 
 | Evaluation | TP / TN / FP / FN | F1 | Accuracy | Failures |
