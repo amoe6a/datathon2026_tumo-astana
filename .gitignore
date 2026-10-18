@@ -8,6 +8,7 @@ __pycache__/
 data/
 models/
 runtime/
+team-kit/
 *.log
 *.mov
 *.mp4
